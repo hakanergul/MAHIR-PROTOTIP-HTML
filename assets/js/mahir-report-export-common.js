@@ -340,12 +340,12 @@
     const development = outcomes.filter((item) => Number(item.successRate) < 0.70);
     return {
       heading: "E. PEDAGOJİK DEĞERLENDİRME",
-      paragraphs: [
-        `Güçlü öğrenme alanları: ${strong.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`,
-        `Geliştirilmesi gereken öğrenme alanları: ${development.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`,
-        "Soru türü, bilişsel düzey ve hata örüntülerine ilişkin değerlendirme: Öğretmen tarafından onaylanan sınav verileri esas alınmıştır."
-      ],
-      tables: []
+      paragraphs: [],
+      tables: [[
+        [`Güçlü öğrenme alanları: ${strong.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`],
+        [`Geliştirilmesi gereken öğrenme alanları: ${development.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`],
+        ["Soru türü, bilişsel düzey ve hata örüntülerine ilişkin değerlendirme: Öğretmen tarafından onaylanan sınav verileri esas alınmıştır."]
+      ]]
     };
   };
 
@@ -372,12 +372,9 @@
       heading: "G. ANALİZDE ESAS ALINAN EĞİTİM BAĞLAMI VE KAYNAKLAR",
       paragraphs: ["Bu rapor; seçilen eğitim bağlamı, ilgili öğretim programı, ölçme ve değerlendirme esasları ile doğrulanmış sınav verileri esas alınarak hazırlanmıştır."],
       tables: [[
-        ["Eğitim Bağlamı", sourceScope.join(" / ")],
-        ["İnceleme Kapsamı", "Öğretmen tarafından onaylanan sınav verileri"],
-        ["Öğretim Programı", sourceScope.find((item) => /program/i.test(item)) || ""],
-        ["Ölçme ve Değerlendirme Dayanağı", sourceScope.find((item) => /ölçme|değerlendirme/i.test(item)) || ""],
-        ["Senaryo / Örnek Evrak", sourceScope.find((item) => /senaryo|örnek/i.test(item)) || ""],
-        ["Diğer Dayanaklar", sourceScope.filter((item) => !/program|ölçme|değerlendirme|senaryo|örnek/i.test(item)).join(" / ")]
+        ["Eğitim Bağlamı", sourceScope.join(" / "), "İnceleme Kapsamı", "Öğretmen tarafından onaylanan sınav verileri"],
+        ["Öğretim Programı", sourceScope.find((item) => /program/i.test(item)) || "", "Ölçme ve Değerlendirme Dayanağı", sourceScope.find((item) => /ölçme|değerlendirme/i.test(item)) || ""],
+        ["Senaryo / Örnek Evrak", sourceScope.find((item) => /senaryo|örnek/i.test(item)) || "", "Diğer Dayanaklar", sourceScope.filter((item) => !/program|ölçme|değerlendirme|senaryo|örnek/i.test(item)).join(" / ")]
       ]]
     };
   };
@@ -388,12 +385,9 @@
       heading: "H. BELGE BİLGİLERİ",
       paragraphs: [],
       tables: [[
-        ["Düzenleyen Öğretmen", valueFrom(exam, ["teacherName", "teacher", "teacherFullName"])],
-        ["Kurum", valueFrom(exam, ["schoolName", "school", "institutionName"])],
-        ["Rapor Tarihi", dateText()],
-        ["Belge / Rapor No", valueFrom(exam, ["documentNo", "reportNo"])],
-        ["İletim / Onay Bilgisi", valueFrom(exam, ["approvalInfo", "transmissionInfo"])],
-        ["Belge Durumu", "Öğretmen tarafından onaylandı"]
+        ["Düzenleyen Öğretmen", valueFrom(exam, ["teacherName", "teacher", "teacherFullName"]), "Kurum", valueFrom(exam, ["schoolName", "school", "institutionName"])],
+        ["Rapor Tarihi", dateText(), "Belge / Rapor No", valueFrom(exam, ["documentNo", "reportNo"])],
+        ["İletim / Onay Bilgisi", valueFrom(exam, ["approvalInfo", "transmissionInfo"]), "Belge Durumu", "Öğretmen tarafından onaylandı"]
       ]]
     };
   };
