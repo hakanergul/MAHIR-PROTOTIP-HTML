@@ -271,28 +271,33 @@
     };
   };
 
-  const buildMetadataRows = () => getMetadata().map((item) => [item.label, item.value]);
+  const metadataValue = (label) => getMetadata().find((item) => item.label === label)?.value || "";
+
+  const buildContextTable = () => [
+    ["İl", metadataValue("İl"), "İlçe", metadataValue("İlçe")],
+    ["Okul / Kurum Adı", metadataValue("Okul/Kurum Adı"), "Öğretmenin Adı Soyadı", metadataValue("Öğretmenin Adı Soyadı")],
+    ["Eğitim Öğretim Yılı", metadataValue("Eğitim Öğretim Yılı"), "Rapor Tarihi", metadataValue("Rapor Tarihi")],
+    ["Öğretim Kademesi", metadataValue("Öğretim Kademesi"), "Okul Türü", metadataValue("Okul Türü")],
+    ["Program Türü", metadataValue("Program Türü"), "Alan / Dal", metadataValue("Alan/Dal")],
+    ["Ders", metadataValue("Ders"), "Sınıf / Şube", metadataValue("Sınıf/Şube")],
+    ["Dönem", metadataValue("Dönem"), "Sınav Türü", metadataValue("Sınav Türü")],
+    ["Sınav Tarihi", metadataValue("Sınav Tarihi"), "Analiz Edilen Öğrenci Sayısı", metadataValue("Analiz Edilen Öğrenci Sayısı")]
+  ];
 
   const buildGeneralSummaryBlock = () => {
     const summary = getSummary();
-    const row = [
-      summary.participatingStudentCount,
-      formatNumber(summary.classAverage),
-      formatNumber(summary.highestScore),
-      formatNumber(summary.lowestScore),
-      summary.successfulStudentCount,
-      summary.unsuccessfulStudentCount,
-      formatPercent(summary.classSuccessRate)
-    ].map((value) => isUseful(value) ? String(value) : "Belirtilmedi");
     return {
       heading: "B. GENEL BAŞARI ÖZETİ",
-      paragraphs: [
-        `${summary.participatingStudentCount || 0} öğrencinin ${summary.questionCount || 0} soruya ait öğretmen onaylı puanları değerlendirilmiştir.`,
-        "Başarılı/başarısız öğrenci sayıları, toplam puanın %50 eşiği esas alınarak hesaplanmıştır."
-      ],
+      paragraphs: [`Genel değerlendirme: ${summary.participatingStudentCount || 0} öğrencinin sınav sonuçları değerlendirilmiştir.`],
       tables: [[
-        ["Analiz Edilen Öğrenci Sayısı", "Sınıf Ortalaması", "En Yüksek Puan", "En Düşük Puan", "Başarılı Öğrenci Sayısı", "Başarısız Öğrenci Sayısı", "Başarı Oranı"],
-        row
+        ["Öğrenci Sayısı", "Sınav Ortalaması", "En Yüksek Puan", "En Düşük Puan", "Başarı Oranı"],
+        [
+          summary.participatingStudentCount || "",
+          formatNumber(summary.classAverage),
+          formatNumber(summary.highestScore),
+          formatNumber(summary.lowestScore),
+          formatPercent(summary.classSuccessRate)
+        ]
       ]]
     };
   };
@@ -301,31 +306,31 @@
     heading: "C. SORU BAZLI BAŞARI ANALİZİ",
     paragraphs: [],
     tables: [[
-      ["Soru", "Öğrenme Çıktısı / Kazanım", "Soru Puanı", "Sınıf Başarı Oranı", "Başarı Düzeyi", "Kısa Değerlendirme"],
+      ["Soru", "Öğrenme Çıktısı / Kazanım", "Azami Puan", "Ortalama", "Başarı %", "Durum"],
       ...getQuestionRows().map((question) => [
-        `S${question.number}`,
+        String(question.number),
         question.outcomeDescription,
         formatNumber(question.maxScore),
+        formatNumber(question.averageScore),
         formatPercent(question.successRate),
-        question.level,
-        question.evaluation
+        question.level
       ])
     ]]
   });
 
   const buildOutcomeBlock = () => {
     const outcomes = getAnalysis().outcomes || [];
-    const rows = outcomes.length ? outcomes.map((outcome) => [
-      normalizeText(outcome.outcomeCode || outcome.learningOutcome || "Öğrenme çıktısı belirtilmedi"),
-      relatedQuestionsForOutcome(outcome.outcomeCode) || "Belirtilmedi",
+    const rows = outcomes.map((outcome) => [
+      normalizeText(outcome.outcomeCode || outcome.learningOutcome),
+      relatedQuestionsForOutcome(outcome.outcomeCode),
       formatPercent(outcome.successRate),
       successLevel(outcome.successRate, outcome.category),
-      normalizeText(outcome.decision) || "Değerlendirme öğretmen onaylı analiz verilerine dayanmaktadır."
-    ]) : [["Belirtilmedi", "Belirtilmedi", "", "Belirlenmedi", "Öğrenme çıktısı bazlı analiz verisi bulunmamaktadır."]];
+      normalizeText(outcome.decision)
+    ]);
     return {
       heading: "D. ÖĞRENME ÇIKTILARI ANALİZİ",
-      paragraphs: [],
-      tables: [[["Öğrenme Çıktısı / Kazanım", "İlgili Sorular", "Başarı Oranı", "Başarı Düzeyi", "Analitik Değerlendirme"], ...rows]]
+      paragraphs: ["Başarı düzeyleri, rapor hazırlanırken kullanılan ölçütlere göre sınıflandırılır; gerekli görüldüğünde değerlendirme eşikleri açıklama bölümünde belirtilir."],
+      tables: [[["Öğrenme Çıktısı", "İlişkili Sorular", "Başarı %", "Düzey", "Kanıt / Kısa Yorum"], ...rows]]
     };
   };
 
@@ -335,64 +340,66 @@
     const development = outcomes.filter((item) => Number(item.successRate) < 0.70);
     return {
       heading: "E. PEDAGOJİK DEĞERLENDİRME",
-      paragraphs: [],
-      tables: [[
-        ["Değerlendirme Alanı", "Rapor Metni"],
-        ["Güçlü yönler", strong.length ? strong.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ") : "Güçlü düzey eşiğine ulaşan öğrenme çıktısı belirlenmemiştir."],
-        ["Geliştirilmesi gereken alanlar", development.length ? development.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ") : "Öncelikli gelişim alanı belirlenmemiştir."],
-        ["Başarı Örüntüsü", "Değerlendirme, öğretmen tarafından onaylanan soru puanları ve öğrenme çıktısı eşleştirmeleri esas alınarak oluşturulmuştur."]
-      ]]
+      paragraphs: [
+        `Güçlü öğrenme alanları: ${strong.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`,
+        `Geliştirilmesi gereken öğrenme alanları: ${development.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`,
+        "Soru türü, bilişsel düzey ve hata örüntülerine ilişkin değerlendirme: Öğretmen tarafından onaylanan sınav verileri esas alınmıştır."
+      ],
+      tables: []
     };
   };
 
   const buildSuggestionsBlock = () => {
     const outcomes = getAnalysis().outcomes || [];
-    const targets = outcomes.filter((item) => Number(item.successRate) < 0.70);
-    const rows = (targets.length ? targets : outcomes.slice(0, 3)).map((item, index) => [
+    const targets = outcomes.filter((item) => Number(item.successRate) < 0.70).slice(0, 3);
+    const rows = targets.map((item, index) => [
       String(index + 1),
-      `${item.outcomeCode || "Öğrenme Çıktısı"} için ${formatPercent(item.successRate) || "belirlenemeyen"} başarı düzeyi`,
-      normalizeText(item.decision) || "Öğretmen, ilgili kazanıma yönelik pekiştirme ve izleme çalışması planlayabilir.",
-      "Kısa uygulama sonrası öğretmen gözlemi ve soru bazlı izleme"
+      `${item.outcomeCode || "Öğrenme Çıktısı"} (${formatPercent(item.successRate)})`,
+      normalizeText(item.decision),
+      "Öğretmen gözlemi ve soru bazlı izleme"
     ]);
     return {
       heading: "F. İYİLEŞTİRME ÖNERİLERİ",
       paragraphs: [],
-      tables: [[["Öncelik", "Tespit Edilen İhtiyaç", "Önerilen Öğretim Müdahalesi", "İzleme Kanıtı / Süre"], ...(rows.length ? rows : [["1", "Öncelikli ihtiyaç verisi oluşmamıştır.", "Mevcut öğretim süreci öğretmen değerlendirmesiyle sürdürülebilir.", "Öğretmen gözlemi"]])]]
+      tables: [[["Öncelik", "Tespit Edilen İhtiyaç", "Önerilen Öğretim Müdahalesi", "İzleme Kanıtı / Süre"], ...rows]]
     };
   };
 
   const buildSourceBlock = () => {
     const context = getContext();
-    const contextText = context.sourceScope.length ? context.sourceScope.join(" / ") : "Seçilen eğitim bağlamı belirtilmemiştir.";
+    const sourceScope = context.sourceScope || [];
     return {
       heading: "G. ANALİZDE ESAS ALINAN EĞİTİM BAĞLAMI VE KAYNAKLAR",
-      paragraphs: ["Bu rapor; seçilen eğitim bağlamı, ilgili öğretim programı, ölçme ve değerlendirme esasları ile öğretmen tarafından onaylanan sınav verileri esas alınarak hazırlanmıştır."],
+      paragraphs: ["Bu rapor; seçilen eğitim bağlamı, ilgili öğretim programı, ölçme ve değerlendirme esasları ile doğrulanmış sınav verileri esas alınarak hazırlanmıştır."],
       tables: [[
-        ["Dayanak", "Kapsam"],
-        ["Seçilen eğitim bağlamı", contextText],
-        ["Öğretmen tarafından onaylanan sınav verileri", "Soru puanları, öğrenci sonuçları ve öğrenme çıktısı eşleştirmeleri"],
-        ["Doğrulanmış resmî kaynak kaydı", "Harici resmî kaynak adı kaydedilmemiştir."]
+        ["Eğitim Bağlamı", sourceScope.join(" / ")],
+        ["İnceleme Kapsamı", "Öğretmen tarafından onaylanan sınav verileri"],
+        ["Öğretim Programı", sourceScope.find((item) => /program/i.test(item)) || ""],
+        ["Ölçme ve Değerlendirme Dayanağı", sourceScope.find((item) => /ölçme|değerlendirme/i.test(item)) || ""],
+        ["Senaryo / Örnek Evrak", sourceScope.find((item) => /senaryo|örnek/i.test(item)) || ""],
+        ["Diğer Dayanaklar", sourceScope.filter((item) => !/program|ölçme|değerlendirme|senaryo|örnek/i.test(item)).join(" / ")]
       ]]
     };
   };
 
   const buildDocumentInfoBlock = () => {
     const exam = getExam();
-    const rows = [
-      ["Düzenleyen Öğretmen", valueFrom(exam, ["teacherName", "teacher", "teacherFullName"])],
-      ["Kurum Adı", valueFrom(exam, ["schoolName", "school", "institutionName"])],
-      ["Rapor Tarihi", dateText()],
-      ["Belge/Rapor Numarası", valueFrom(exam, ["documentNo", "reportNo", "documentPage"])]
-    ].filter((row) => isUseful(row[1]));
     return {
       heading: "H. BELGE BİLGİLERİ",
       paragraphs: [],
-      tables: rows.length ? [[["Alan", "Bilgi"], ...rows]] : []
+      tables: [[
+        ["Düzenleyen Öğretmen", valueFrom(exam, ["teacherName", "teacher", "teacherFullName"])],
+        ["Kurum", valueFrom(exam, ["schoolName", "school", "institutionName"])],
+        ["Rapor Tarihi", dateText()],
+        ["Belge / Rapor No", valueFrom(exam, ["documentNo", "reportNo"])],
+        ["İletim / Onay Bilgisi", valueFrom(exam, ["approvalInfo", "transmissionInfo"])],
+        ["Belge Durumu", "Öğretmen tarafından onaylandı"]
+      ]]
     };
   };
 
   const getBlocks = () => [
-    { heading: "A. SINAV VE EĞİTİM BAĞLAMI", paragraphs: [], tables: [[["Alan", "Bilgi"], ...buildMetadataRows()]] },
+    { heading: "A. SINAV VE EĞİTİM BAĞLAMI", paragraphs: [], tables: [buildContextTable()] },
     buildGeneralSummaryBlock(),
     buildQuestionBlock(),
     buildOutcomeBlock(),
