@@ -2024,44 +2024,57 @@ body:has(#welcome-screen.active-screen) .welcome-footer-social svg {
 }
 
 
-/* Report approval actions: aligned desktop layout with a controlled mobile fallback */
+/* Report approval actions */
 .report-final-approval {
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px 24px;
 }
 
 .report-final-approval-label {
-  flex: 1 1 auto;
   min-width: 0;
 }
 
 .report-final-actions {
-  flex: 0 0 auto;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, auto));
+  align-items: center;
+  justify-content: end;
+  gap: 12px;
   margin-left: auto;
 }
 
 .report-final-actions .primary-button,
 .report-final-actions .secondary-button {
-  min-width: 164px;
+  width: 100%;
+  min-width: 150px;
   white-space: nowrap;
 }
 
-@media (max-width: 760px) {
+.report-print-note,
+.report-output-validation-message {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 920px) {
   .report-final-approval {
-    align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .report-final-actions {
-    display: grid;
-    grid-template-columns: 1fr;
     width: 100%;
     margin-left: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .report-final-actions {
+    grid-template-columns: 1fr;
   }
 
   .report-final-actions .primary-button,
   .report-final-actions .secondary-button {
-    width: 100%;
     min-width: 0;
   }
 }
