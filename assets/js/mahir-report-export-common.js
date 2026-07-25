@@ -311,7 +311,7 @@
         String(question.number),
         question.outcomeDescription,
         formatNumber(question.maxScore),
-        formatNumber(question.averageScore),
+        formatNumber(question.average),
         formatPercent(question.successRate),
         question.level
       ])
