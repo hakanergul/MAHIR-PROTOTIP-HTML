@@ -1,5 +1,5 @@
 (() => {
-  const REPORT_TITLE = "MAHİR SINAV SONUÇLARI ANALİZ RAPORU";
+  const REPORT_TITLE = "SINAV SONUÇLARI ANALİZ RAPORU";
   const BRAND_NAME = "MAHİR";
   const BRAND_EXPANSION = "Maarif Anlayışıyla Hizmet İşleme ve Raporlama Ajanı";
   const SUCCESS_THRESHOLD = 0.5;
