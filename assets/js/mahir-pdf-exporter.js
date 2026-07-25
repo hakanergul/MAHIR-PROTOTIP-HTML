@@ -83,17 +83,14 @@
   };
 
   const measureHeader = (context, model, design, contentWidth) => {
-    setFont(context, design.titleSize + 8, 800);
-    const brandLines = wrapText(context, model.brand, contentWidth);
-    setFont(context, design.subtitleSize, 400);
-    const subtitleLines = wrapText(context, model.expansion, contentWidth);
+    setFont(context, 18, 700);
+    const headerLines = wrapText(context, "MAHİR | Sınav Analizi ve Değerlendirme", contentWidth);
     setFont(context, design.titleSize, 800);
     const titleLines = wrapText(context, model.title, contentWidth);
     return {
-      brandLines,
-      subtitleLines,
+      headerLines,
       titleLines,
-      height: brandLines.length * (design.titleLine + 6) + subtitleLines.length * design.subtitleLine + titleLines.length * design.titleLine + 16
+      height: headerLines.length * 24 + titleLines.length * design.titleLine + 18
     };
   };
 
@@ -126,31 +123,19 @@
   const drawHeader = (context, item, model, design, contentWidth) => {
     const { colors } = design;
     let cursorY = item.y;
-    setFont(context, design.titleSize + 8, 800);
-    context.fillStyle = colors.navy;
-    item.header.brandLines.forEach((line) => {
-      context.fillText(line, design.contentX + (contentWidth - context.measureText(line).width) / 2, cursorY);
-      cursorY += design.titleLine + 6;
+    setFont(context, 18, 700);
+    context.fillStyle = "#666666";
+    item.header.headerLines.forEach((line) => {
+      context.fillText(line, design.contentX + contentWidth - context.measureText(line).width, cursorY);
+      cursorY += 24;
     });
-    setFont(context, design.subtitleSize, 400);
-    context.fillStyle = colors.heading;
-    item.header.subtitleLines.forEach((line) => {
-      context.fillText(line, design.contentX + (contentWidth - context.measureText(line).width) / 2, cursorY);
-      cursorY += design.subtitleLine;
-    });
-    cursorY += 5;
+    cursorY += 10;
     setFont(context, design.titleSize, 800);
     context.fillStyle = colors.navy;
     item.header.titleLines.forEach((line) => {
       context.fillText(line, design.contentX + (contentWidth - context.measureText(line).width) / 2, cursorY);
       cursorY += design.titleLine;
     });
-    context.strokeStyle = colors.blue;
-    context.lineWidth = 2;
-    context.beginPath();
-    context.moveTo(design.contentX, cursorY + 5);
-    context.lineTo(design.contentX + contentWidth, cursorY + 5);
-    context.stroke();
   };
 
   const drawTable = (context, tableLayout, x, y, width, design) => {
