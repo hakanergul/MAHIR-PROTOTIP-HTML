@@ -80,17 +80,18 @@
     const model = common().syncOutputHeader(reportElement) || common().getReportModel(reportElement);
     if (!model.validation.valid) throw new Error(model.validation.message);
     const body = [
-      paragraph(model.brand, "Title", { color: "17365D", size: 44, bold: true, align: "center", keepNext: true, after: 40, line: 440 }),
-      paragraph(model.expansion.toLocaleUpperCase("tr-TR"), "Subtitle", { color: "365F91", size: 20, align: "center", keepNext: true, after: 60, line: 240 }),
       paragraph(model.title, "ReportTitle", { color: "17365D", size: 28, bold: true, align: "center", keepNext: true, after: 180, line: 320 }),
       ...model.blocks.map(sectionXml)
     ].join("");
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="${WORD_NS}"><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="900" w:right="850" w:bottom="850" w:left="850" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="${WORD_NS}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body}<w:sectPr><w:headerReference w:type="default" r:id="rId1"/><w:footerReference w:type="default" r:id="rId2"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="900" w:right="850" w:bottom="850" w:left="850" w:header="480" w:footer="480" w:gutter="0"/></w:sectPr></w:body></w:document>`;
   };
 
   const stylesXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="${WORD_NS}"><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:color w:val="1F1F1F"/></w:rPr><w:pPr><w:spacing w:line="252" w:lineRule="auto" w:after="80"/></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:b/><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="44"/><w:szCs w:val="44"/><w:color w:val="17365D"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:color w:val="365F91"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="ReportTitle"><w:name w:val="Report Title"/><w:basedOn w:val="Normal"/><w:qFormat/><w:rPr><w:b/><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="28"/><w:szCs w:val="28"/><w:color w:val="17365D"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="SectionTitle"><w:name w:val="Section Title"/><w:basedOn w:val="Normal"/><w:rPr><w:b/><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:color w:val="FFFFFF"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="TableText"><w:name w:val="Table Text"/><w:basedOn w:val="Normal"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr><w:pPr><w:spacing w:after="0" w:line="224" w:lineRule="auto"/></w:pPr></w:style></w:styles>`;
 
-  const contentTypesXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`;
+  const headerXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr xmlns:w="${WORD_NS}">${paragraph("MAHİR | Sınav Analizi ve Değerlendirme", "Normal", { color: "666666", size: 18, bold: true, align: "right", after: 0 })}</w:hdr>`;
+  const footerXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr xmlns:w="${WORD_NS}">${paragraph("MAHİR — Maarif Anlayışıyla Hizmet İşleme ve Raporlama Ajanı", "Normal", { color: "666666", size: 18, align: "center", after: 0 })}</w:ftr>`;
+  const documentRelsXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>`;
+  const contentTypesXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>`;
   const relsXml = () => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
 
   const dosDateTime = () => {
@@ -139,6 +140,9 @@
       { name: "[Content_Types].xml", content: contentTypesXml() },
       { name: "_rels/.rels", content: relsXml() },
       { name: "word/document.xml", content: documentXml(reportElement) },
+      { name: "word/_rels/document.xml.rels", content: documentRelsXml() },
+      { name: "word/header1.xml", content: headerXml() },
+      { name: "word/footer1.xml", content: footerXml() },
       { name: "word/styles.xml", content: stylesXml() }
     ]);
     triggerDownload(blob, filename);
