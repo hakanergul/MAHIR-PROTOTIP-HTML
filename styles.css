@@ -2022,3 +2022,46 @@ body:has(#welcome-screen.active-screen) .welcome-footer-social svg {
     font-weight: 800 !important;
   }
 }
+
+
+/* Report approval actions: aligned desktop layout with a controlled mobile fallback */
+.report-final-approval {
+  flex-wrap: nowrap;
+}
+
+.report-final-approval-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.report-final-actions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-left: auto;
+}
+
+.report-final-actions .primary-button,
+.report-final-actions .secondary-button {
+  min-width: 164px;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .report-final-approval {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .report-final-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .report-final-actions .primary-button,
+  .report-final-actions .secondary-button {
+    width: 100%;
+    min-width: 0;
+  }
+}
