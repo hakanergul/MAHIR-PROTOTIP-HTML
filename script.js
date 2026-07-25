@@ -2385,6 +2385,7 @@ const fileUploadBridge = (() => {
     let structuredData = null;
     let previewUrl = null;
     let progressTimer;
+    const reportRuntime = window.MAHIRReportRuntime = window.MAHIRReportRuntime || {};
 
     const setStatus = (message, state = "") => {
       if (!statusMessage) return;
@@ -2511,6 +2512,9 @@ const fileUploadBridge = (() => {
     const renderValidationData = (data) => {
       if (!data) return;
       structuredData = data;
+      reportRuntime.structuredData = data;
+      reportRuntime.exam = data.exam || {};
+      reportRuntime.analysis = null;
       const questionBody = document.querySelector("[data-validation-questions]");
       const studentHead = document.querySelector("[data-validation-student-head]");
       const studentBody = document.querySelector("[data-validation-students]");
@@ -2589,10 +2593,11 @@ const fileUploadBridge = (() => {
     };
 
     const collectApprovedData = () => {
-      const questions = Array.from(document.querySelectorAll("[data-question-row]")).map((row) => ({
+      const questions = Array.from(document.querySelectorAll("[data-question-row]")).map((row, index) => ({
         number: numberValue(row.querySelector('[data-validation-field="number"]')),
         maxScore: numberValue(row.querySelector('[data-validation-field="maxScore"]')),
-        outcomeCode: row.querySelector('[data-validation-field="outcomeCode"]')?.value.trim() || ""
+        outcomeCode: row.querySelector('[data-validation-field="outcomeCode"]')?.value.trim() || "",
+        outcomeDescription: structuredData?.questions?.[index]?.outcomeDescription || ""
       }));
       const students = Array.from(document.querySelectorAll("[data-student-row]")).map((row) => ({
         rowNumber: Number(row.dataset.rowNumber),
@@ -2608,6 +2613,7 @@ const fileUploadBridge = (() => {
     const renderAnalysis = (analysis) => {
       const reportScreen = document.querySelector("#report-screen");
       if (reportScreen?.dataset.reportLocked === "true") return;
+      reportRuntime.analysis = analysis;
       const summary = analysis.summary || {};
       const reportSummary = document.querySelector("#report-screen .summary-card p");
       const general = document.querySelector("#report-screen [aria-labelledby='general-evaluation-title'] p");
@@ -2748,17 +2754,57 @@ const fileUploadBridge = (() => {
 
 const reportApprovalManager = (() => {
   let approvalInput;
-  let pdfButton;
+  let wordButton;
+  let downloadButton;
+  let printButton;
   let reportScreen;
+  let outputMessage;
+
+  const actionButtons = () => [wordButton, downloadButton, printButton].filter(Boolean);
+
+  const setOutputMessage = (message = "", state = "") => {
+    if (!outputMessage) return;
+    outputMessage.textContent = message;
+    outputMessage.hidden = !message;
+    outputMessage.classList.toggle("is-error", state === "error");
+    outputMessage.classList.toggle("is-success", state === "success");
+  };
+
+  const setButtonsEnabled = (enabled) => {
+    actionButtons().forEach((button) => {
+      button.disabled = !enabled;
+      button.setAttribute("aria-disabled", String(!enabled));
+    });
+  };
+
+  const syncAndValidateOutput = () => {
+    if (!window.MAHIRReportExport?.syncOutputHeader) {
+      setOutputMessage("Rapor çıktı modeli yüklenemedi.", "error");
+      return false;
+    }
+    const model = window.MAHIRReportExport.syncOutputHeader(reportScreen);
+    if (!model?.validation?.valid) {
+      setOutputMessage(model?.validation?.message || "Rapor çıktısı için gerekli bilgiler tamamlanmalıdır.", "error");
+      return false;
+    }
+    setOutputMessage("Rapor çıktıları etkinleştirildi. Word, PDF veya Yazdır seçeneklerini kullanabilirsiniz.", "success");
+    return true;
+  };
 
   const setApproved = (isApproved) => {
-    if (!reportScreen || !pdfButton) return;
+    if (!reportScreen) return;
     reportScreen.dataset.reportLocked = String(isApproved);
     reportScreen.querySelectorAll("article, aside").forEach((section) => {
       section.dataset.reportLocked = String(isApproved);
     });
-    pdfButton.disabled = !isApproved;
-    pdfButton.setAttribute("aria-disabled", String(!isApproved));
+
+    if (!isApproved) {
+      setButtonsEnabled(false);
+      setOutputMessage();
+      return;
+    }
+
+    setButtonsEnabled(syncAndValidateOutput());
   };
 
   const resetApproval = () => {
@@ -2766,8 +2812,58 @@ const reportApprovalManager = (() => {
     setApproved(false);
   };
 
+  const downloadApprovedWord = async () => {
+    if (!approvalInput?.checked || wordButton?.disabled || !syncAndValidateOutput()) return;
+    if (!window.MAHIRDocxExporter?.downloadReportDocx) {
+      console.error("[MAHIR] Word üretici yüklenemedi.");
+      return;
+    }
+
+    const originalText = wordButton.textContent;
+    wordButton.disabled = true;
+    wordButton.setAttribute("aria-disabled", "true");
+    wordButton.textContent = "Word Hazırlanıyor…";
+
+    try {
+      await window.MAHIRDocxExporter.downloadReportDocx(reportScreen, {
+        filename: "MAHIR_Sinav_Sonuclari_Analiz_Raporu.docx"
+      });
+    } catch (error) {
+      console.error("[MAHIR] Word dosyası oluşturulamadı.", error);
+      window.alert?.(error.message || "Word dosyası oluşturulamadı. Lütfen raporu kontrol edip yeniden deneyiniz.");
+    } finally {
+      wordButton.textContent = originalText;
+      setApproved(approvalInput.checked);
+    }
+  };
+
+  const downloadApprovedReport = async () => {
+    if (!approvalInput?.checked || downloadButton?.disabled || !syncAndValidateOutput()) return;
+    if (!window.MAHIRPdfExporter?.downloadReportPdf) {
+      console.error("[MAHIR] PDF üretici yüklenemedi.");
+      return;
+    }
+
+    const originalText = downloadButton.textContent;
+    downloadButton.disabled = true;
+    downloadButton.setAttribute("aria-disabled", "true");
+    downloadButton.textContent = "PDF Hazırlanıyor…";
+
+    try {
+      await window.MAHIRPdfExporter.downloadReportPdf(reportScreen, {
+        filename: "MAHIR_Sinav_Sonuclari_Analiz_Raporu.pdf"
+      });
+    } catch (error) {
+      console.error("[MAHIR] PDF oluşturulamadı.", error);
+      window.alert?.(error.message || "PDF oluşturulamadı. Lütfen raporu kontrol edip yeniden deneyiniz.");
+    } finally {
+      downloadButton.textContent = originalText;
+      setApproved(approvalInput.checked);
+    }
+  };
+
   const printApprovedReport = () => {
-    if (!approvalInput?.checked || pdfButton?.disabled) return;
+    if (!approvalInput?.checked || printButton?.disabled || !syncAndValidateOutput()) return;
     const cleanupPrintMode = () => document.body.classList.remove("print-approved-report");
     document.body.classList.add("print-approved-report");
     window.addEventListener("afterprint", cleanupPrintMode, { once: true });
@@ -2778,12 +2874,17 @@ const reportApprovalManager = (() => {
   const init = () => {
     reportScreen = document.querySelector("#report-screen");
     approvalInput = document.querySelector("[data-final-report-approval]");
-    pdfButton = document.querySelector("[data-download-approved-pdf]");
-    if (!reportScreen || !approvalInput || !pdfButton) return;
+    wordButton = document.querySelector("[data-download-approved-word]");
+    downloadButton = document.querySelector("[data-download-approved-pdf]");
+    printButton = document.querySelector("[data-print-approved-report]");
+    outputMessage = document.querySelector("[data-output-validation-message]");
+    if (!reportScreen || !approvalInput || !wordButton || !downloadButton || !printButton) return;
 
     resetApproval();
     approvalInput.addEventListener("change", () => setApproved(approvalInput.checked));
-    pdfButton.addEventListener("click", printApprovedReport);
+    wordButton.addEventListener("click", downloadApprovedWord);
+    downloadButton.addEventListener("click", downloadApprovedReport);
+    printButton.addEventListener("click", printApprovedReport);
     document.addEventListener("mahir:report-reset", resetApproval);
   };
 

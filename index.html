@@ -222,7 +222,8 @@
       </section>
 
       <section id="data-entry-screen" class="screen hidden-screen" aria-labelledby="data-entry-title" data-screen="data-entry" data-screen-state="hidden" aria-hidden="true" hidden>
-        <header class="screen-header">
+
+                <header class="screen-header">
           <nav class="progress-stepper" data-component="Progress Stepper" aria-label="İlerleme durumu">
             <ol>
               <li>Hazırlık</li>
@@ -281,7 +282,8 @@
       </section>
 
       <section id="validation-screen" class="screen hidden-screen" aria-labelledby="validation-title" data-screen="validation" data-screen-state="hidden" data-data-approval-state="pending" aria-hidden="true" hidden>
-        <header class="screen-header">
+
+                <header class="screen-header">
           <nav class="progress-stepper" data-component="Progress Stepper" aria-label="İlerleme durumu">
             <ol>
               <li>Hazırlık</li>
@@ -340,7 +342,8 @@
         </div>
       </section>
       <section id="analysis-screen" class="screen hidden-screen" aria-labelledby="analysis-title" data-screen="analysis" data-screen-state="hidden" aria-hidden="true" hidden>
-        <header class="screen-header">
+
+                <header class="screen-header">
           <nav class="progress-stepper" data-component="Progress Stepper" aria-label="İlerleme durumu">
             <ol>
               <li>Hazırlık</li>
@@ -373,6 +376,14 @@
       </section>
 
       <section id="report-screen" class="screen hidden-screen" aria-labelledby="report-title" data-screen="report" data-screen-state="hidden" aria-hidden="true" hidden>
+        <div class="report-output-header" data-output-header aria-hidden="true">
+          <p class="report-output-brand">MAH&#304;R</p>
+          <p class="report-output-subtitle" data-output-subtitle>Maarif Anlay&#305;&#351;&#305;yla Hizmet &#304;&#351;leme ve Raporlama Ajan&#305;</p>
+          <h2 data-output-title>MAH&#304;R SINAV SONU&Ccedil;LARI ANAL&#304;Z RAPORU</h2>
+          <dl></dl>
+        </div>
+        <div class="report-output-body" data-output-body aria-hidden="true"></div>
+
         <header class="screen-header">
           <nav class="progress-stepper" data-component="Progress Stepper" aria-label="İlerleme durumu">
             <ol>
@@ -439,7 +450,13 @@
             <input id="final-report-approval" type="checkbox" data-final-report-approval>
             Nihai raporu öğretmen olarak onaylıyorum.
           </label>
-          <button class="primary-button" data-component="Primary Button" type="button" data-download-approved-pdf disabled aria-disabled="true">Onaylı Raporu PDF Olarak İndir</button>
+          <div class="report-final-actions">
+            <button class="secondary-button" data-component="Secondary Button" type="button" data-download-approved-word disabled aria-disabled="true">Word Olarak İndir</button>
+            <button class="primary-button" data-component="Primary Button" type="button" data-download-approved-pdf disabled aria-disabled="true">PDF Olarak İndir</button>
+            <button class="secondary-button" data-component="Secondary Button" type="button" data-print-approved-report disabled aria-disabled="true">Yazdır</button>
+          </div>
+          <p class="report-print-note" data-pdf-exclude>Yazdırma penceresinde tarayıcı üstbilgileri ve altbilgileri görünürse, temiz rapor çıktısı için “Üstbilgiler ve altbilgiler” seçeneğini kapatınız.</p>
+          <p class="report-output-validation-message" data-output-validation-message data-pdf-exclude hidden></p>
         </div>
       </section>
     </div>
@@ -490,6 +507,9 @@
 
   </div>
 
+  <script src="assets/js/mahir-report-export-common.js"></script>
+  <script src="assets/js/mahir-docx-exporter.js"></script>
+  <script src="assets/js/mahir-pdf-exporter.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
