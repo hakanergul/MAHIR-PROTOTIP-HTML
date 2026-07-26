@@ -406,8 +406,6 @@
   const getReportModel = (reportElement) => {
     const model = {
       title: REPORT_TITLE,
-      brand: BRAND_NAME,
-      expansion: BRAND_EXPANSION,
       metadata: getMetadata(),
       blocks: getBlocks(),
       generatedAt: new Date().toISOString(),
@@ -459,10 +457,8 @@
     if (!reportElement) return null;
     const model = getReportModel(reportElement);
     const titleTarget = reportElement.querySelector("[data-output-title]");
-    const subtitleTarget = reportElement.querySelector("[data-output-subtitle]");
     const list = reportElement.querySelector("[data-output-header] dl");
     if (titleTarget) titleTarget.textContent = model.title;
-    if (subtitleTarget) subtitleTarget.textContent = `${model.brand} - ${model.expansion}`;
     if (list) {
       list.replaceChildren();
       model.metadata.forEach((item) => {
