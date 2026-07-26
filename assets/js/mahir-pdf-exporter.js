@@ -84,13 +84,11 @@
 
   const measureHeader = (context, model, design, contentWidth) => {
     setFont(context, 18, 700);
-    const headerLines = wrapText(context, "MAHİR | Sınav Analizi ve Değerlendirme", contentWidth);
     setFont(context, design.titleSize, 800);
     const titleLines = wrapText(context, model.title, contentWidth);
     return {
-      headerLines,
       titleLines,
-      height: headerLines.length * 24 + titleLines.length * design.titleLine + 18
+      height: titleLines.length * design.titleLine + 10
     };
   };
 
@@ -123,13 +121,6 @@
   const drawHeader = (context, item, model, design, contentWidth) => {
     const { colors } = design;
     let cursorY = item.y;
-    setFont(context, 18, 700);
-    context.fillStyle = "#666666";
-    item.header.headerLines.forEach((line) => {
-      context.fillText(line, design.contentX + contentWidth - context.measureText(line).width, cursorY);
-      cursorY += 24;
-    });
-    cursorY += 10;
     setFont(context, design.titleSize, 800);
     context.fillStyle = colors.navy;
     item.header.titleLines.forEach((line) => {
