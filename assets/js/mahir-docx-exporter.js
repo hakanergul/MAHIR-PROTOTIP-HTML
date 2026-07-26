@@ -69,12 +69,12 @@
     return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblLayout w:type="fixed"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="9EBCD3"/><w:left w:val="single" w:sz="4" w:color="9EBCD3"/><w:bottom w:val="single" w:sz="4" w:color="9EBCD3"/><w:right w:val="single" w:sz="4" w:color="9EBCD3"/><w:insideH w:val="single" w:sz="4" w:color="9EBCD3"/><w:insideV w:val="single" w:sz="4" w:color="9EBCD3"/></w:tblBorders></w:tblPr><w:tblGrid>${Array.from({ length: columnCount }, () => `<w:gridCol w:w="${Math.floor(9360 / columnCount)}"/>`).join("")}</w:tblGrid>${tableRows}</w:tbl>${options.after === false ? "" : paragraph("", "Normal", { after: 70, line: 120 })}`;
   };
 
-  const sectionBand = (heading, columnCount = 1) => `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblLayout w:type="fixed"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="2F75B5"/><w:left w:val="single" w:sz="4" w:color="2F75B5"/><w:bottom w:val="single" w:sz="4" w:color="2F75B5"/><w:right w:val="single" w:sz="4" w:color="2F75B5"/></w:tblBorders></w:tblPr><w:tblGrid>${Array.from({ length: columnCount }, () => `<w:gridCol w:w="${Math.floor(9360 / columnCount)}"/>`).join("")}</w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr>${cell(paragraph(heading, "SectionTitle", { color: "FFFFFF", bold: true, after: 0, line: 230 }), { width: 5000, gridSpan: columnCount, shade: "2F75B5", noBorders: true })}</w:tr></w:tbl>`;
+  const sectionBand = (heading) => `<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="2F75B5"/><w:left w:val="single" w:sz="4" w:color="2F75B5"/><w:bottom w:val="single" w:sz="4" w:color="2F75B5"/><w:right w:val="single" w:sz="4" w:color="2F75B5"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="9360"/></w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/><w:shd w:fill="2F75B5"/><w:tcMar><w:top w:w="90" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar></w:tcPr>${paragraph(heading, "SectionTitle", { color: "FFFFFF", bold: true, after: 0, line: 230 })}</w:tc></w:tr></w:tbl>`;
 
   const sectionXml = (block) => {
     const columnCount = Math.max(...(block.tables || []).flatMap((table) => (table || []).map((row) => row.length)), 1);
     return [
-    sectionBand(block.heading, columnCount),
+    sectionBand(block.heading),
     ...block.paragraphs.map((text) => paragraph(text, "Normal", { after: 70, line: 252 })),
     ...block.tables.map((table) => tableXml(table, { after: true }))
     ].join("");
