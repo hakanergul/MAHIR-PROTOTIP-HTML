@@ -2756,11 +2756,10 @@ const reportApprovalManager = (() => {
   let approvalInput;
   let wordButton;
   let downloadButton;
-  let printButton;
   let reportScreen;
   let outputMessage;
 
-  const actionButtons = () => [wordButton, downloadButton, printButton].filter(Boolean);
+  const actionButtons = () => [wordButton, downloadButton].filter(Boolean);
 
   const setOutputMessage = (message = "", state = "") => {
     if (!outputMessage) return;
@@ -2787,7 +2786,7 @@ const reportApprovalManager = (() => {
       setOutputMessage(model?.validation?.message || "Rapor çıktısı için gerekli bilgiler tamamlanmalıdır.", "error");
       return false;
     }
-    setOutputMessage("Rapor çıktıları etkinleştirildi. Word, PDF veya Yazdır seçeneklerini kullanabilirsiniz.", "success");
+    setOutputMessage("Rapor çıktıları etkinleştirildi. Word veya PDF seçeneklerini kullanabilirsiniz.", "success");
     return true;
   };
 
@@ -2862,29 +2861,18 @@ const reportApprovalManager = (() => {
     }
   };
 
-  const printApprovedReport = () => {
-    if (!approvalInput?.checked || printButton?.disabled || !syncAndValidateOutput()) return;
-    const cleanupPrintMode = () => document.body.classList.remove("print-approved-report");
-    document.body.classList.add("print-approved-report");
-    window.addEventListener("afterprint", cleanupPrintMode, { once: true });
-    window.print();
-    window.setTimeout(cleanupPrintMode, 1000);
-  };
-
   const init = () => {
     reportScreen = document.querySelector("#report-screen");
     approvalInput = document.querySelector("[data-final-report-approval]");
     wordButton = document.querySelector("[data-download-approved-word]");
     downloadButton = document.querySelector("[data-download-approved-pdf]");
-    printButton = document.querySelector("[data-print-approved-report]");
     outputMessage = document.querySelector("[data-output-validation-message]");
-    if (!reportScreen || !approvalInput || !wordButton || !downloadButton || !printButton) return;
+    if (!reportScreen || !approvalInput || !wordButton || !downloadButton) return;
 
     resetApproval();
     approvalInput.addEventListener("change", () => setApproved(approvalInput.checked));
     wordButton.addEventListener("click", downloadApprovedWord);
     downloadButton.addEventListener("click", downloadApprovedReport);
-    printButton.addEventListener("click", printApprovedReport);
     document.addEventListener("mahir:report-reset", resetApproval);
   };
 
