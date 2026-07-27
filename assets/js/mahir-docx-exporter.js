@@ -1,6 +1,7 @@
 (() => {
   const encoder = new TextEncoder();
   const WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const CONTENT_WIDTH_DXA = 10206;
 
   const crcTable = (() => {
     const table = new Uint32Array(256);
@@ -41,7 +42,7 @@
   };
 
   const cell = (content, options = {}) => {
-    const width = options.width ? `<w:tcW w:w="${options.width}" w:type="pct"/>` : "";
+    const width = options.width ? `<w:tcW w:w="${options.width}" w:type="dxa"/>` : "";
     const shade = options.shade ? `<w:shd w:fill="${options.shade}"/>` : "";
     const gridSpan = options.gridSpan ? `<w:gridSpan w:val="${options.gridSpan}"/>` : "";
     const borders = options.noBorders ? "" : "<w:tcBorders><w:top w:val=\"single\" w:sz=\"4\" w:color=\"9EBCD3\"/><w:left w:val=\"single\" w:sz=\"4\" w:color=\"9EBCD3\"/><w:bottom w:val=\"single\" w:sz=\"4\" w:color=\"9EBCD3\"/><w:right w:val=\"single\" w:sz=\"4\" w:color=\"9EBCD3\"/></w:tcBorders>";
@@ -51,7 +52,7 @@
   const tableXml = (rows, options = {}) => {
     if (!rows?.length) return "";
     const columnCount = Math.max(...rows.map((row) => row.length), 1);
-    const width = Math.floor(5000 / columnCount);
+    const width = Math.floor(CONTENT_WIDTH_DXA / columnCount);
     const tableRows = rows.map((row, rowIndex) => {
       const rowProps = `<w:trPr><w:cantSplit/>${rowIndex === 0 ? "<w:tblHeader/>" : ""}</w:trPr>`;
       const cells = Array.from({ length: columnCount }, (_, index) => {
@@ -66,10 +67,10 @@
       }).join("");
       return `<w:tr>${rowProps}${cells}</w:tr>`;
     }).join("");
-    return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblLayout w:type="fixed"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="9EBCD3"/><w:left w:val="single" w:sz="4" w:color="9EBCD3"/><w:bottom w:val="single" w:sz="4" w:color="9EBCD3"/><w:right w:val="single" w:sz="4" w:color="9EBCD3"/><w:insideH w:val="single" w:sz="4" w:color="9EBCD3"/><w:insideV w:val="single" w:sz="4" w:color="9EBCD3"/></w:tblBorders></w:tblPr><w:tblGrid>${Array.from({ length: columnCount }, () => `<w:gridCol w:w="${Math.floor(9360 / columnCount)}"/>`).join("")}</w:tblGrid>${tableRows}</w:tbl>${options.after === false ? "" : paragraph("", "Normal", { after: 70, line: 120 })}`;
+    return `<w:tbl><w:tblPr><w:tblW w:w="${CONTENT_WIDTH_DXA}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="9EBCD3"/><w:left w:val="single" w:sz="4" w:color="9EBCD3"/><w:bottom w:val="single" w:sz="4" w:color="9EBCD3"/><w:right w:val="single" w:sz="4" w:color="9EBCD3"/><w:insideH w:val="single" w:sz="4" w:color="9EBCD3"/><w:insideV w:val="single" w:sz="4" w:color="9EBCD3"/></w:tblBorders></w:tblPr><w:tblGrid>${Array.from({ length: columnCount }, () => `<w:gridCol w:w="${width}"/>`).join("")}</w:tblGrid>${tableRows}</w:tbl>${options.after === false ? "" : paragraph("", "Normal", { after: 70, line: 120 })}`;
   };
 
-  const sectionBand = (heading) => `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblLayout w:type="fixed"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="2F75B5"/><w:left w:val="single" w:sz="4" w:color="2F75B5"/><w:bottom w:val="single" w:sz="4" w:color="2F75B5"/><w:right w:val="single" w:sz="4" w:color="2F75B5"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="9360"/></w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="5000" w:type="pct"/><w:shd w:fill="2F75B5"/><w:tcMar><w:top w:w="90" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar></w:tcPr>${paragraph(heading, "SectionTitle", { color: "FFFFFF", bold: true, after: 0, line: 230 })}</w:tc></w:tr></w:tbl>`;
+  const sectionBand = (heading) => `<w:tbl><w:tblPr><w:tblW w:w="${CONTENT_WIDTH_DXA}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="2F75B5"/><w:left w:val="single" w:sz="4" w:color="2F75B5"/><w:bottom w:val="single" w:sz="4" w:color="2F75B5"/><w:right w:val="single" w:sz="4" w:color="2F75B5"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="${CONTENT_WIDTH_DXA}"/></w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${CONTENT_WIDTH_DXA}" w:type="dxa"/><w:shd w:fill="2F75B5"/><w:tcMar><w:top w:w="90" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar></w:tcPr>${paragraph(heading, "SectionTitle", { color: "FFFFFF", bold: true, after: 0, line: 230 })}</w:tc></w:tr></w:tbl>`;
 
   const sectionXml = (block) => {
     const columnCount = Math.max(...(block.tables || []).flatMap((table) => (table || []).map((row) => row.length)), 1);
