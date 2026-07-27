@@ -1682,6 +1682,68 @@ body:has(#welcome-screen.active-screen) .welcome-footer-social svg {
   color: #0b6f72;
 }
 
+.workspace-backup-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px 24px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.workspace-backup-panel h3,
+.workspace-backup-panel p {
+  margin: 0;
+}
+
+.workspace-backup-panel p {
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.workspace-backup-actions,
+.workspace-backup-confirmation {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.workspace-backup-file-label {
+  cursor: pointer;
+}
+
+.workspace-backup-file-label input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.workspace-backup-preview {
+  grid-column: 1 / -1;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.workspace-backup-message.is-error {
+  color: #8a1f1f;
+}
+
+.workspace-backup-message.is-success {
+  color: #0b6f72;
+}
+
+.workspace-backup-confirmation {
+  margin-top: 14px;
+}
+
 /* Report approval actions */
 .report-final-approval {
   display: grid;
@@ -1715,6 +1777,14 @@ body:has(#welcome-screen.active-screen) .welcome-footer-social svg {
 }
 
 @media (max-width: 920px) {
+  .workspace-backup-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-backup-actions {
+    justify-content: flex-start;
+  }
+
   .report-final-approval {
     grid-template-columns: 1fr;
   }

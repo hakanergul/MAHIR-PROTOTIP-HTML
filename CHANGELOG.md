@@ -2,6 +2,14 @@
 
 Bu dosya, MAHİR projesindeki önemli değişiklikleri kronolojik olarak takip etmek için hazırlanmıştır.
 
+## v1.7 Yedek Sürüm Uyumluluğu - 2026-07-27
+
+- Güncel çalışma yedekleri bütünlük özeti bulunan v2 şemasıyla oluşturulur.
+- Bütünlüğü doğrulanan v1 dosya ve tarayıcı kayıtları, özgün içerik değiştirilmeden v2’ye dönüştürülür.
+- Önizlemede kaynak ve hedef sürüm gösterilir; dönüşüm sonrasında açık öğretmen onayı zorunludur.
+- Gelecekteki, desteklenmeyen, bozuk, eksik veya paket–kayıt sürümü uyuşmayan yedekler reddedilir.
+- Ham sınav verisi, yüklenen dosya ve açık öğrenci listesi çalışma yedeğine alınmaz.
+
 ## Word Şablonu Veri Okuma - 2026-07-24
 
 - MAHİR Veri Giriş Şablonu biçimindeki `.docx` belgeleri gerçek tablo yapısından okunur.

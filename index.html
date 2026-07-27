@@ -443,6 +443,27 @@
           <p>Bu bölüm rapor taslağındaki değerlendirmelerin dayanaklarını öğretmen kontrolüne sunar.</p>
         </aside>
 
+        <section class="workspace-backup-panel" aria-labelledby="workspace-backup-title" data-pdf-exclude>
+          <div>
+            <h3 id="workspace-backup-title">Çalışma Yedeği</h3>
+            <p>Öğretmen kararlarını ve rapor metinlerini anonim bir v2 yedeği olarak saklayın veya doğrulanmış bir yedeği geri yükleyin.</p>
+          </div>
+          <div class="workspace-backup-actions">
+            <button class="secondary-button" type="button" data-download-workspace-backup>v2 Yedeğini İndir</button>
+            <label class="secondary-button workspace-backup-file-label">
+              Yedek Dosyası Seç
+              <input type="file" accept=".json,application/json" data-workspace-backup-input>
+            </label>
+          </div>
+          <div class="workspace-backup-preview" data-workspace-backup-preview hidden>
+            <p class="workspace-backup-message" data-workspace-backup-message role="status" aria-live="polite"></p>
+            <div class="workspace-backup-confirmation">
+              <button class="secondary-button" type="button" data-cancel-workspace-restore>Vazgeç</button>
+              <button class="primary-button" type="button" data-confirm-workspace-restore disabled>Geri Yüklemeyi Onayla</button>
+            </div>
+          </div>
+        </section>
+
         <div class="report-final-approval" data-pdf-exclude>
           <label class="report-final-approval-label" for="final-report-approval">
             <input id="final-report-approval" type="checkbox" data-final-report-approval>
@@ -506,6 +527,7 @@
   <script src="assets/js/mahir-report-export-common.js"></script>
   <script src="assets/js/mahir-docx-exporter.js"></script>
   <script src="assets/js/mahir-pdf-exporter.js"></script>
+  <script src="assets/js/mahir-workspace-backup.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
