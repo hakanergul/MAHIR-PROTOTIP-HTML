@@ -1740,6 +1740,10 @@ body:has(#welcome-screen.active-screen) .welcome-footer-social svg {
   color: #0b6f72;
 }
 
+[data-local-workspace-message] {
+  margin-top: 14px;
+}
+
 .workspace-backup-confirmation {
   margin-top: 14px;
 }

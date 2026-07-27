@@ -2,6 +2,14 @@
 
 Bu dosya, MAHİR projesindeki önemli değişiklikleri kronolojik olarak takip etmek için hazırlanmıştır.
 
+## v1.8 Yerel Çalışma Kaydı - 2026-07-27
+
+- Açık çalışma, öğretmen isteğiyle yalnız kullanılan tarayıcının yerel kayıt alanına kaydedilir.
+- Her kayıt benzersiz kimlik ve kayıt zamanı taşıyan doğrulanmış v2 çalışma paketi olarak saklanır.
+- Öğrenci adı, numarası, puan satırları, ham sınav verisi ve yüklenen dosya yerel çalışma kaydına alınmaz.
+- Kayıt sonucu öğretmene açık başarı veya hata iletisiyle bildirilir.
+- Word ve PDF indirme akışları korunmuş, Yazdır işlemi eklenmemiştir.
+
 ## v1.7 Yedek Sürüm Uyumluluğu - 2026-07-27
 
 - Güncel çalışma yedekleri bütünlük özeti bulunan v2 şemasıyla oluşturulur.

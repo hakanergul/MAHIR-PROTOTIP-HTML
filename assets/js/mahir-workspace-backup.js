@@ -168,6 +168,31 @@
     });
   };
 
+  const createRecordId = (now = new Date()) => {
+    const stamp = now.toISOString().replace(/[-:.TZ]/g, "");
+    const random = Math.random().toString(36).slice(2, 8);
+    return `${stamp}-${random}`;
+  };
+
+  const saveLocalRecord = (storage, workspace, options = {}) => {
+    if (!storage || typeof storage.setItem !== "function" || typeof storage.getItem !== "function") {
+      throw new Error("Tarayıcı yerel kayıt alanına erişilemiyor.");
+    }
+    const savedAt = options.savedAt || new Date().toISOString();
+    const recordId = options.recordId || createRecordId(new Date(savedAt));
+    const backup = createBackup({
+      ...clone(workspace),
+      timestamps: {
+        ...(workspace.timestamps || {}),
+        savedAt
+      }
+    });
+    const key = `${STORAGE_PREFIX}${recordId}`;
+    storage.setItem(key, JSON.stringify(backup));
+    const verified = inspect(storage.getItem(key));
+    return { key, recordId, savedAt, backup: verified.original };
+  };
+
   const migrateStoredV1Records = (storage) => {
     if (!storage) return { migrated: 0, rejected: 0 };
     let migrated = 0;
@@ -249,6 +274,8 @@
 
   const init = () => {
     const downloadButton = document.querySelector("[data-download-workspace-backup]");
+    const saveButton = document.querySelector("[data-save-local-workspace]");
+    const saveMessage = document.querySelector("[data-local-workspace-message]");
     const input = document.querySelector("[data-workspace-backup-input]");
     const preview = document.querySelector("[data-workspace-backup-preview]");
     const message = document.querySelector("[data-workspace-backup-message]");
@@ -256,7 +283,7 @@
     const cancelButton = document.querySelector("[data-cancel-workspace-restore]");
     let pending = null;
 
-    if (!downloadButton || !input || !preview || !message || !confirmButton || !cancelButton) return;
+    if (!downloadButton || !saveButton || !saveMessage || !input || !preview || !message || !confirmButton || !cancelButton) return;
     migrateStoredV1Records(window.localStorage);
 
     const resetPreview = () => {
@@ -269,6 +296,18 @@
     };
 
     downloadButton.addEventListener("click", () => downloadJson(createBackup(collectWorkspace())));
+    saveButton.addEventListener("click", () => {
+      saveMessage.hidden = false;
+      try {
+        const result = saveLocalRecord(window.localStorage, collectWorkspace());
+        const savedTime = new Date(result.savedAt).toLocaleString("tr-TR");
+        saveMessage.className = "workspace-backup-message is-success";
+        saveMessage.textContent = `Çalışma bu tarayıcıya anonim olarak kaydedildi (${savedTime}). Öğrenci verileri ve yüklenen sınav dosyası kayda alınmadı.`;
+      } catch (error) {
+        saveMessage.className = "workspace-backup-message is-error";
+        saveMessage.textContent = `Çalışma kaydedilemedi: ${error.message}`;
+      }
+    });
     input.addEventListener("change", async () => {
       resetPreview();
       const file = input.files?.[0];
@@ -310,6 +349,7 @@
     digest,
     createBackup,
     createLegacyV1Backup,
+    saveLocalRecord,
     inspect,
     prepareRestore,
     migrateStoredV1Records

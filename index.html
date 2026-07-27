@@ -449,12 +449,14 @@
             <p>Öğretmen kararlarını ve rapor metinlerini anonim bir v2 yedeği olarak saklayın veya doğrulanmış bir yedeği geri yükleyin.</p>
           </div>
           <div class="workspace-backup-actions">
+            <button class="primary-button" type="button" data-save-local-workspace>Çalışmayı Yerel Kaydet</button>
             <button class="secondary-button" type="button" data-download-workspace-backup>v2 Yedeğini İndir</button>
             <label class="secondary-button workspace-backup-file-label">
               Yedek Dosyası Seç
               <input type="file" accept=".json,application/json" data-workspace-backup-input>
             </label>
           </div>
+          <p class="workspace-backup-message" data-local-workspace-message role="status" aria-live="polite" hidden></p>
           <div class="workspace-backup-preview" data-workspace-backup-preview hidden>
             <p class="workspace-backup-message" data-workspace-backup-message role="status" aria-live="polite"></p>
             <div class="workspace-backup-confirmation">

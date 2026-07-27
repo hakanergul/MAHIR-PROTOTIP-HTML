@@ -57,4 +57,29 @@ const storageResult = backup.migrateStoredV1Records(storage);
 assert.deepEqual(storageResult, { migrated: 1, rejected: 1 });
 assert.equal(JSON.parse(stored.get(`${backup.STORAGE_PREFIX}legacy`)).schemaVersion, 2);
 
+const localRecords = new Map();
+const localStorage = {
+  get length() { return localRecords.size; },
+  key(index) { return Array.from(localRecords.keys())[index] || null; },
+  getItem(key) { return localRecords.get(key) || null; },
+  setItem(key, value) { localRecords.set(key, value); }
+};
+const localSave = backup.saveLocalRecord(localStorage, workspace, {
+  recordId: "v18-test-record",
+  savedAt: "2026-07-27T09:30:00.000Z"
+});
+assert.equal(localSave.key, `${backup.STORAGE_PREFIX}v18-test-record`);
+assert.equal(localSave.savedAt, "2026-07-27T09:30:00.000Z");
+assert.equal(localRecords.size, 1);
+const savedBackup = JSON.parse(localStorage.getItem(localSave.key));
+assert.equal(savedBackup.schemaVersion, 2);
+assert.equal(savedBackup.workspace.timestamps.savedAt, localSave.savedAt);
+assert.equal(savedBackup.workspace.teacherContext.course, "Türk Dili ve Edebiyatı");
+assert.equal(backup.inspect(savedBackup).converted, false);
+assert.equal(JSON.stringify(savedBackup).includes("students"), false);
+assert.throws(
+  () => backup.saveLocalRecord(localStorage, { ...workspace, rawExamData: "gizli" }),
+  /gizlilik sınırını ihlal/
+);
+
 console.log("workspace-backup.test.js: all assertions passed");
