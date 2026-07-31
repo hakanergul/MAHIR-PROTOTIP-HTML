@@ -1,0 +1,15 @@
+{
+  "name": "mahir-prototip-html",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dev tooling only (lint/format). No build step; open index.html directly or run backend/run_file_receiver.py.",
+  "scripts": {
+    "lint": "eslint js",
+    "format": "prettier --write \"js/**/*.js\" \"*.html\" \"styles/**/*.css\"",
+    "format:check": "prettier --check \"js/**/*.js\" \"*.html\" \"styles/**/*.css\""
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "prettier": "^3"
+  }
+}

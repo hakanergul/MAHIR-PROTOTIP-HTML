@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mahir-file-receiver",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["backend/run_file_receiver.py"],
+      "port": 8000
+    }
+  ]
+}

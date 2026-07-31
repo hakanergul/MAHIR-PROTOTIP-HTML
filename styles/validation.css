@@ -1,0 +1,45 @@
+.data-confirmation-layout {
+  display: grid;
+  gap: 22px;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  color: var(--color-secondary);
+  font-weight: 800;
+}
+
+.validation-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 4.5rem;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid #c8d2dc;
+  border-radius: 0.4rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+
+.validation-input:focus {
+  border-color: #146c5a;
+  outline: 3px solid rgb(20 108 90 / 16%);
+}

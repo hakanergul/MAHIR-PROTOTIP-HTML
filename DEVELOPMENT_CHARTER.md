@@ -15,10 +15,10 @@ Prototip, öğretmenin sınav bilgilerini, soru bazlı verileri ve öğrenme ç�
 İlk geliştirme aşamasında proje yalın web teknolojileriyle yürütülür:
 
 - HTML ile tek sayfalık yapı kurulur.
-- CSS ile sade, modern ve okunaklı bir arayüz tasarlanır.
-- JavaScript ile yalnızca temel sayfa içi etkileşimler sağlanır.
-- Harici framework, paket yöneticisi veya build sistemi kullanılmaz.
-- Proje dosyaları doğrudan tarayıcıda açılabilecek biçimde tutulur.
+- CSS ile sade, modern ve okunaklı bir arayüz tasarlanır; okunabilirlik için ekran/bileşen bazlı ayrı dosyalara bölünebilir.
+- JavaScript ile yalnızca temel sayfa içi etkileşimler sağlanır; okunabilirlik için ayrı modül dosyalarına bölünebilir (klasik `<script>` etiketleri, `type="module"` veya bundler kullanılmaz).
+- Arayüzde çalışma zamanında (runtime) harici framework veya build sistemi kullanılmaz; proje dosyaları hâlâ doğrudan tarayıcıda açılabilecek biçimde tutulur.
+- `package.json` yalnızca geliştirme aracı (lint/format) amacıyla, build adımı gerektirmeyecek şekilde bulunabilir.
 - GitHub Desktop, sürüm takibi ve GitHub'a gönderim için temel araç olarak kullanılır.
 
 Bu teknik kapsam, prototipin hızlı anlaşılmasını, kolay incelenmesini ve öğretmen ihtiyaçlarına göre adım adım şekillendirilmesini amaçlar.
@@ -44,15 +44,20 @@ Bu sınırlamalar, projenin ilk aşamada net, denetlenebilir ve küçük adımla
 
 ## 4. Klasör ve Dosya Yapısı
 
-Projenin ilk aşamadaki dosya yapısı yalın tutulur:
+Proje büyüdükçe dosya yapısı ekran/bileşen bazlı modüllere ayrıldı:
 
 ```text
 MAHIR-PROTOTIP-HTML/
 ├─ README.md
 ├─ DEVELOPMENT_CHARTER.md
+├─ package.json            (yalnızca dev-tooling: eslint/prettier)
 ├─ index.html
-├─ styles.css
-└─ script.js
+├─ js/                     (ekran/bileşen bazlı JavaScript modülleri)
+├─ styles/                 (ekran/bileşen bazlı CSS dosyaları)
+├─ backend/                (Python stdlib-only dosya alıcı ve analiz motoru)
+│  └─ app/
+├─ shared/                 (örnek veri ve şablonlar)
+└─ docs/
 ```
 
 Dosya sorumlulukları:
@@ -60,8 +65,9 @@ Dosya sorumlulukları:
 - `README.md`: Projenin kısa tanımı, çalışma özeti ve ana belge bağlantıları.
 - `DEVELOPMENT_CHARTER.md`: Geliştirme kuralları, sürüm sistemi ve çalışma disiplini.
 - `index.html`: Tek sayfalık arayüzün HTML yapısı.
-- `styles.css`: Görsel düzen, tipografi, renkler ve responsive davranış.
-- `script.js`: Sayfa içi temel etkileşimler.
+- `styles/`: Görsel düzen, tipografi, renkler ve responsive davranış; her dosya bir ekranı veya paylaşılan bileşenleri kapsar.
+- `js/`: Sayfa içi etkileşimler; her dosya tek bir sorumluluk alanını (ekran yönetimi, hazırlık formu, dosya yükleme, rapor onayı) kapsar.
+- `backend/app/`: Dosya alıcı, DOCX/CSV ayrıştırma ve analiz motoru (yalnızca Python standart kütüphanesi).
 
 Yeni klasör veya dosya yalnızca sprint kapsamı açıkça gerektiriyorsa eklenir.
 
@@ -121,7 +127,7 @@ Kurallar:
 - İşlem sonunda değişen dosyalar açıkça raporlanır.
 - Eksik doğrulama varsa saklanmaz, açıkça belirtilir.
 - Kullanıcının elle yaptığı değişiklikler geri alınmaz.
-- `index.html`, `styles.css` ve `script.js` gibi ana dosyalarda gereksiz refaktör yapılmaz.
+- `index.html`, `js/` ve `styles/` gibi ana dosya ve klasörlerde kullanıcı onayı olmadan gereksiz refaktör yapılmaz.
 
 Codex, proje boyunca öğretmen kontrolü ilkesini ve sade prototip yaklaşımını korumalıdır.
 
@@ -171,7 +177,7 @@ Aşağıdaki işlemler kullanıcı açıkça istemedikçe yapılmaz:
 - Gerçek yapay zekâ, API veya veritabanı entegrasyonu yapmak
 - Dosya yükleme, OCR, PDF veya Word üretimi eklemek
 - Çok sayfalı yapı kurmak
-- Harici framework veya paket sistemi eklemek
+- Çalışma zamanında (runtime) harici framework veya build sistemi eklemek (dev-tooling amaçlı `package.json` bu maddenin dışındadır)
 - Mevcut kullanıcı değişikliklerini geri almak
 - `git reset`, `git checkout --` veya benzeri geri alma işlemleri yapmak
 - Gizli anahtar, token veya kişisel veri istemek ya da depoya yazmak

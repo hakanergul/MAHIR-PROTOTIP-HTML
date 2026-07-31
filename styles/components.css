@@ -1,0 +1,165 @@
+/* Not: Analiz ekranına özel bir stil dosyası yoktur; bu ekran tamamen bu dosyadaki paylaşılan bileşen sınıflarını kullanır. */
+
+/* =========================================================
+   ORTAK UYGULAMA BİLEŞENLERİ
+   ========================================================= */
+
+.app-header,
+.app-footer,
+.screen,
+.summary-card,
+.information-card,
+.validation-card,
+.table-card,
+.data-scope-card,
+.analysis-progress,
+.report-section,
+.source-reference-panel,
+.upload-box,
+.notification-message {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(18, 52, 91, 0.06);
+}
+
+.screen {
+  display: none;
+  padding: 28px;
+}
+
+.screen.active-screen {
+  display: grid;
+  gap: 24px;
+}
+
+.screen.hidden-screen,
+.screen[data-screen-state="hidden"],
+.screen[hidden] {
+  display: none !important;
+}
+
+.screen-header {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-secondary);
+  line-height: 1.2;
+}
+
+.primary-button,
+.secondary-button,
+button {
+  min-height: 44px;
+  width: fit-content;
+  padding: 10px 22px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button {
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+}
+
+.secondary-button {
+  color: var(--color-secondary);
+  background: var(--color-surface);
+  border-color: var(--color-secondary);
+}
+
+.notification-message {
+  margin: 0;
+  padding: 18px 20px;
+  border-left: 4px solid var(--color-primary);
+  color: var(--color-muted);
+}
+
+.summary-card,
+.information-card,
+.validation-card,
+.table-card,
+.data-scope-card,
+.analysis-progress,
+.report-section,
+.source-reference-panel,
+.upload-box {
+  padding: 22px;
+}
+
+.progress-stepper ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(100px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-stepper li {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.progress-stepper [aria-current="step"] {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+form,
+fieldset,
+.dropdown {
+  display: grid;
+  gap: 40px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+label,
+legend,
+dt {
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+input[type="checkbox"] {
+  width: auto;
+  min-height: auto;
+}
+
+.button-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+
+.primary-button:disabled,
+button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.52;
+}

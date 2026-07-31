@@ -1,0 +1,82 @@
+#report-screen.active-screen {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.36fr);
+}
+
+#report-screen > header,
+#report-screen > .notification-message,
+#report-screen > .summary-card,
+#report-screen > .secondary-button,
+#report-screen > .report-final-approval {
+  grid-column: 1 / -1;
+}
+
+#report-screen > .source-reference-panel {
+  grid-column: 2;
+  grid-row: 4 / span 3;
+}
+
+.report-final-approval {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.report-final-approval-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.report-final-approval input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+@media print {
+  body.print-approved-report {
+    background: #ffffff !important;
+  }
+
+  body.print-approved-report .app-header,
+  body.print-approved-report .app-footer,
+  body.print-approved-report .screen:not(#report-screen),
+  body.print-approved-report #report-screen .progress-stepper,
+  body.print-approved-report #report-screen > .notification-message,
+  body.print-approved-report #report-screen [data-pdf-exclude],
+  body.print-approved-report #report-screen button,
+  body.print-approved-report #report-screen input {
+    display: none !important;
+  }
+
+  body.print-approved-report .app-shell,
+  body.print-approved-report .screen-container,
+  body.print-approved-report #report-screen {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  body.print-approved-report #report-screen {
+    color: #000000 !important;
+  }
+
+  body.print-approved-report #report-screen article,
+  body.print-approved-report #report-screen aside {
+    break-inside: avoid;
+    border-color: #d8dee8 !important;
+    box-shadow: none !important;
+  }
+}
