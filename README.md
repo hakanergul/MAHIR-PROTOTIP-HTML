@@ -12,7 +12,15 @@ okunur. Sonuçlar analizden önce düzenlenebilir Veri Onay tablolarında göste
 
 ## Güncel Çalışan Akış
 
-Hazırlık ekranından sonra öğretmen, standart MAHİR Veri Giriş Şablonu'nu indirebilir; doldurduğu Word, PDF veya görüntü belgesini yükleyebilir. Dosya türü ve boyutu denetlendikten sonra belge öğretmen kontrol ekranına aktarılır.
+Uygulama altı ekranlı bir akış izler: Karşılama → Hazırlık → Veri → Veri Onay → Analiz → Rapor.
+
+- **Hazırlık**: Öğretmen öğretim kademesi, okul türü, sınıf düzeyi ve ders bilgilerini seçer.
+- **Veri**: Öğretmen standart MAHİR Veri Giriş Şablonu'nu indirebilir; doldurduğu Word, PDF veya görüntü belgesini yükleyebilir. Dosya türü ve boyutu denetlendikten sonra `.docx` şablonları gerçek tablo yapısından okunur (sınav bilgisi, soru–öğrenme çıktısı eşleştirmeleri, öğrenci puanları).
+- **Veri Onay**: Okunan veriler düzenlenebilir tablolarda gösterilir; öğretmen hücreleri düzeltip veriyi onaylar.
+- **Analiz**: Onaylanan veriler ölçme, program eşleştirme ve pedagojik analiz motorlarından geçirilir.
+- **Rapor**: Öğretmen onaylı bir rapor taslağı üretilir; öğretmen son onayı verdikten sonra yazdırma/PDF çıktısı alınabilir.
+
+Proje dosyaları ekran/bileşen bazlı modüllere ayrılmıştır: JavaScript `js/`, CSS `styles/`, dosya alıcı ve analiz motoru `backend/app/` altındadır (bkz. [DEVELOPMENT_CHARTER.md](DEVELOPMENT_CHARTER.md) §4).
 
 Yerel prototipi dosya alıcısıyla çalıştırmak için:
 
@@ -24,7 +32,7 @@ Ardından `http://127.0.0.1:8000/index.html` adresi açılır.
 
 ## Geliştirme Kuralları
 
-Bu projede geliştirme adım adım, küçük ve onaylı sürümler halinde yapılır. Her sprintte yalnızca belirlenen kapsam uygulanır; yapay zekâ, veritabanı, OCR, dosya okuma, PDF/Word üretimi ve sistem entegrasyonu ilk aşamada kapsam dışıdır.
+Bu projede geliştirme adım adım, küçük ve onaylı sürümler halinde yapılır. Her sprintte yalnızca belirlenen kapsam uygulanır. Dosya yükleme, `.docx` şablon okuma ve yazdırma tabanlı PDF çıktısı artık uygulanmış durumdadır; gerçek yapay zekâ/OCR entegrasyonu, veritabanı ve harici API entegrasyonu hâlâ kapsam dışıdır.
 
 Ayrıntılı geliştirme kuralları, sürümleme sistemi, dosya düzeni ve kontrol listeleri için bkz. [DEVELOPMENT_CHARTER.md](DEVELOPMENT_CHARTER.md).
 
@@ -159,3 +167,30 @@ Kontrol notu: Bu kontrol sırasında varlık dosyaları henüz klasörlere eklen
 ## Sprint 1 / Task 03
 
 Project management documents oluşturuldu.
+
+## Sprint 1 (devamı) - Tasarım ve Yapı Belgeleri
+
+Low-fidelity wireframe, wireframe davranışları, UI Contract, Semantic HTML Foundation, Visual Identity, Layout Foundation, Screen Flow & Navigation ve Navigation Engine tamamlanarak Sprint 1 kapatıldı (bkz. [SPRINT_1_REVIEW.md](SPRINT_1_REVIEW.md)).
+
+## Sprint 2 - Welcome Screen & Trust Engine
+
+Güven ilkeleri ("Trust Engine") kartları eklendi, UI refinement yapıldı, SVG ikon kütüphanesi oluşturuldu; karşılama ekranı birkaç iterasyonla yeniden inşa edilip kilitlendi.
+
+## Sprint 3 - Core Workflow Screens
+
+Karşılama → Hazırlık → Veri → Veri Onay → Analiz → Rapor akışının temel altı ekranlı iskeleti kuruldu.
+
+## Sprint 4-6 - MAHIR AI Engine Core (sonradan kaldırıldı)
+
+Mock bir çoklu-agent orkestrasyon sistemi (Document Agent, Structuring Agent, agent contracts, event bus, mock OCR sağlayıcıları) denendi. Bu sistem hiçbir zaman gerçek veri akışına bağlanmadı; sonraki sprintlerde yerini doğrudan bir Python backend'e bıraktı ve aşağıdaki "Modülerleştirme ve Dev Tooling" çalışmasında `script.js`'den tamamen silindi.
+
+## Backend ve Analiz Motoru
+
+Gerçek veri işleme hattı kuruldu: CSV→CED dönüşümü, program eşleştirme motoru, ölçme motoru, pedagojik analiz motoru, raporlama motoru, `.docx` şablon okuma, öğretmen dosya yükleme akışı (frontend↔backend entegrasyonu), analiz ilerleme görselleştirmesi, öğretmen onaylı veri analizi ve yazdırma tabanlı rapor çıktısı ("PDF export").
+
+## Modülerleştirme ve Dev Tooling - 2026-08-01
+
+- `script.js` (2797 satır) ve `styles.css` (1694 satır) ekran/bileşen bazlı modüllere bölündü (`js/`, `styles/`).
+- Hiçbir yerden çağrılmayan "MAHIR AI Engine Core" mock alt sistemi (Sprint 4-6, ~1663 satır) silindi.
+- Dev-tooling eklendi: `package.json` (eslint/prettier, build adımı yok), `backend/` için `ruff` + `pytest` iskelesi ve smoke testler.
+- `DEVELOPMENT_CHARTER.md` güncel klasör yapısını ve dev-tooling istisnasını yansıtacak şekilde güncellendi.
