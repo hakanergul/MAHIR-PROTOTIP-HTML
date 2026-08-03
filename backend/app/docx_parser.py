@@ -245,7 +245,6 @@ def _build_warnings(
             warnings.append(f"{student['rowNumber']}. öğrenci satırında ad soyad boş.")
         if (
             student["totalScore"] is not None
-            and student["attendance"].casefold() not in {"g", "girmedi", "katilmadi"}
             and abs(float(student["totalScore"]) - float(student["calculatedTotal"])) > 0.01
         ):
             warnings.append(
