@@ -235,14 +235,37 @@
           <h2 id="data-entry-title">Veri Ekleme</h2>
         </header>
 
-        <p>MAHİR Veri Giriş Şablonu'nu Word'de veya elle doldurup Word, PDF ya da görüntü olarak yükleyiniz.</p>
+        <p>Sınav yapısını belirleyiniz, soruları öğrenme çıktılarıyla eşleştiriniz ve öğrenci puanlarının bulunduğu veri evrakını yükleyiniz.</p>
 
         <form class="data-upload-form" aria-labelledby="data-entry-title" data-upload-form>
+          <article class="exam-structure-card" aria-labelledby="exam-structure-title">
+            <div class="exam-structure-heading">
+              <div>
+                <p class="data-entry-kicker">Sınav yapısı</p>
+                <h3 id="exam-structure-title">Soru, Puan ve Öğrenme Çıktısı Eşleştirmesi</h3>
+                <p>Öğrenci verisini yüklemeden önce sınavın soru ve puan yapısını öğretmen olarak tanımlayınız.</p>
+              </div>
+              <p class="score-total" data-score-total>Toplam puan: 0</p>
+            </div>
+            <div class="exam-count-grid">
+              <label>Öğrenci Sayısı
+                <input type="number" min="1" max="100" step="1" value="35" data-student-count required>
+              </label>
+              <label>Soru Sayısı
+                <input type="number" min="1" max="20" step="1" value="10" data-question-count required>
+              </label>
+            </div>
+            <div class="question-configuration-list" data-question-configuration></div>
+            <p class="notification-message exam-structure-status" data-exam-structure-status aria-live="polite">
+              Her soru için azami puanı ve öğrenme çıktısını seçiniz.
+            </p>
+          </article>
+
           <article class="template-download-card" aria-labelledby="template-download-title">
             <div>
               <p class="data-entry-kicker">Önerilen yöntem</p>
               <h3 id="template-download-title">MAHİR Veri Giriş Şablonu – Sürüm 1</h3>
-              <p>10 soru ve 35 öğrenciye kadar düzenlenmiş standart veri evrakını indirip doldurabilirsiniz.</p>
+              <p>Öğrenci numarası, ad-soyad ve soru puanlarını içeren standart veri evrakını indirip doldurabilirsiniz.</p>
             </div>
             <a class="secondary-button template-download-button" href="shared/templates/MAHIR_Veri_Giris_Sablonu_Surum_1.docx" download>
               Şablonu İndir
@@ -299,7 +322,8 @@
 
         <div class="data-confirmation-layout" aria-label="Veri onay katmanı">
           <article class="table-card question-map-card" data-component="Validation Card" aria-labelledby="question-map-title">
-            <h3 id="question-map-title">Soru, Puan ve Öğrenme Çıktısı Eşleştirmesi</h3>
+            <h3 id="question-map-title">Sınav Yapısı Özeti</h3>
+            <p>Veri Ekleme aşamasında öğretmen tarafından belirlenen eşleştirmeler.</p>
             <div class="table-wrap">
               <table class="data-table">
                 <caption>Soru bazlı puan ve öğrenme çıktısı özeti</caption>
@@ -357,20 +381,19 @@
         </header>
 
         <article class="analysis-progress" data-component="Analysis Progress" aria-labelledby="analysis-progress-title">
-          <h3 id="analysis-progress-title">Aşama listesi</h3>
+          <h3 id="analysis-progress-title">Analiz Özeti</h3>
           <ol>
-            <li>Veriler doğrulanıyor.</li>
-            <li>Soru ve puan ilişkileri yapılandırılıyor.</li>
-            <li>Öğrenme çıktıları eşleştiriliyor.</li>
-            <li>Sayısal analiz hazırlanıyor.</li>
-            <li>Kanıt kontrolü yapılıyor.</li>
-            <li>Pedagojik değerlendirme oluşturuluyor.</li>
-            <li>Öğretim önerileri hazırlanıyor.</li>
+            <li>Veriler öğretmen onayıyla kesinleştirildi.</li>
+            <li>Soru ve puan bilgileri kontrol edildi.</li>
+            <li>Sorular öğrenme çıktılarıyla eşleştirildi.</li>
+            <li>Sınıf ve soru bazlı başarı düzeyleri hesaplandı.</li>
+            <li>Öğrenme çıktıları ve becerilere ilişkin gelişim ihtiyaçları belirlendi.</li>
+            <li>Sınav sonuçları analiz raporu hazırlandı.</li>
           </ol>
         </article>
 
         <p class="notification-message" data-component="Notification Message">
-          Değerlendirme adımları hazırlanıyor; lütfen kısa bir süre bekleyiniz.
+          Analiz tamamlandı. Sınav sonuçları analiz raporu görüntülenmeye hazırdır.
         </p>
 
         <button class="primary-button" data-component="Primary Button" type="button" data-target-screen="report-screen">Raporu Görüntüle</button>
@@ -392,57 +415,15 @@
               <li aria-current="step">Rapor</li>
             </ol>
           </nav>
-          <h2 id="report-title">Maarif Modeli Temelli Sınav Analizi ve Değerlendirme Raporu</h2>
+          <h2 id="report-title">Sınav Sonuçları Analiz Raporu</h2>
         </header>
 
         <p class="notification-message" data-component="Notification Message">
           Raporun sahibi öğretmendir. Dil resmî, ölçülü, akademik ve kamu hizmeti anlayışına uygun olmalıdır.
         </p>
 
-        <article class="summary-card" data-component="Summary Card" aria-labelledby="report-summary-title">
-          <h3 id="report-summary-title">Rapor Özeti</h3>
-          <p>Bu alan, öğretmen kontrolünde incelenecek rapor taslağının genel çerçevesini sunar.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="general-evaluation-title">
-          <h3 id="general-evaluation-title">Genel Değerlendirme</h3>
-          <p>Bu bölüm öğretmen tarafından incelenecek taslak değerlendirme alanıdır.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="analysis-table-title">
-          <h3 id="analysis-table-title">Analiz Çizelgesi</h3>
-          <p>Bu bölüm soru ve puan ilişkilerinin rapor taslağı içinde düzenleneceği alandır.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="learning-outcomes-title">
-          <h3 id="learning-outcomes-title">Öğrenme Çıktıları Değerlendirmesi</h3>
-          <p>Bu bölüm öğrenme çıktılarıyla ilgili değerlendirme taslağını içerir.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="strong-areas-title">
-          <h3 id="strong-areas-title">Güçlü Öğrenme Alanları</h3>
-          <p>Bu bölüm güçlü öğrenme alanlarının öğretmen kontrolünde sunulacağı alandır.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="development-areas-title">
-          <h3 id="development-areas-title">Gelişimi Desteklenecek Alanlar</h3>
-          <p>Bu bölüm gelişimi desteklenecek alanlara ilişkin taslak değerlendirmeyi içerir.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="teaching-suggestions-title">
-          <h3 id="teaching-suggestions-title">Öğretim Önerileri</h3>
-          <p>Bu bölüm öğretim sürecini destekleyecek öneri taslaklarını içerir.</p>
-        </article>
-
-        <article class="report-section" data-component="Report Section" aria-labelledby="monitoring-plan-title">
-          <h3 id="monitoring-plan-title">İzleme ve Gelişim Planı</h3>
-          <p>Bu bölüm izleme ve gelişim planının öğretmen tarafından düzenleneceği alandır.</p>
-        </article>
-
-        <aside class="source-reference-panel" data-component="Source Reference Panel" aria-labelledby="source-reference-title">
-          <h3 id="source-reference-title">Kaynak Dayanakları</h3>
-          <p>Bu bölüm rapor taslağındaki değerlendirmelerin dayanaklarını öğretmen kontrolüne sunar.</p>
-        </aside>
+        <p class="report-intro" data-report-intro>Öğretmen onaylı veriler esas alınarak oluşturulan rapor aşağıda, indirilecek belgeyle aynı bölüm sırasıyla sunulmuştur.</p>
+        <div class="report-preview-sections" data-report-preview-sections></div>
 
         <div class="report-final-approval" data-pdf-exclude>
           <label class="report-final-approval-label" for="final-report-approval">

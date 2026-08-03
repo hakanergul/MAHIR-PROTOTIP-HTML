@@ -21,30 +21,35 @@ def analyze_approved_data(payload: dict[str, Any]) -> dict[str, Any]:
     participating = [
         _normalize_student(item, normalized_questions, index)
         for index, item in enumerate(students, 1)
-        if _is_participating(item)
     ]
     if not participating:
         raise ValueError("Sınava katılan öğrenci bulunmadığı için analiz oluşturulamadı.")
 
     question_results = []
-    outcome_totals: dict[str, dict[str, float]] = defaultdict(
-        lambda: {"earned": 0.0, "possible": 0.0}
+    outcome_totals: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {"earned": 0.0, "possible": 0.0, "skill": ""}
     )
     for question_index, question in enumerate(normalized_questions):
         earned = sum(student["scores"][question_index] for student in participating)
         possible = question["maxScore"] * len(participating)
         rate = earned / possible if possible else 0.0
         question_results.append({**question, "earnedScore": earned, "possibleScore": possible, "successRate": rate})
-        outcome_code = question["outcomeCode"] or f"Soru {question['number']}"
-        outcome_totals[outcome_code]["earned"] += earned
-        outcome_totals[outcome_code]["possible"] += possible
+        outcome_key = " | ".join(
+            value for value in (question["outcomeTheme"], question["outcomeCode"]) if value
+        ) or f"Soru {question['number']}"
+        outcome_totals[outcome_key]["earned"] += earned
+        outcome_totals[outcome_key]["possible"] += possible
+        outcome_totals[outcome_key]["skill"] = question["outcomeSkill"]
 
     outcome_results = []
-    for code, totals in outcome_totals.items():
+    for outcome_key, totals in outcome_totals.items():
         rate = totals["earned"] / totals["possible"] if totals["possible"] else 0.0
+        theme, separator, code = outcome_key.rpartition(" | ")
         outcome_results.append(
             {
-                "outcomeCode": code,
+                "outcomeCode": code if separator else outcome_key,
+                "outcomeTheme": theme if separator else "",
+                "outcomeSkill": totals["skill"],
                 "earnedScore": totals["earned"],
                 "possibleScore": totals["possible"],
                 "successRate": rate,
@@ -61,7 +66,7 @@ def analyze_approved_data(payload: dict[str, Any]) -> dict[str, Any]:
             "questionCount": len(normalized_questions),
             "studentCount": len(students),
             "participatingStudentCount": len(participating),
-            "absentStudentCount": len(students) - len(participating),
+            "absentStudentCount": 0,
             "examMaxScore": exam_max,
             "classAverage": round(average, 2),
             "classSuccessRate": average / exam_max if exam_max else 0.0,
@@ -84,6 +89,8 @@ def _normalize_question(item: Any, fallback_number: int) -> dict[str, Any]:
         "maxScore": max_score,
         "outcomeCode": str(item.get("outcomeCode") or "").strip(),
         "outcomeDescription": str(item.get("outcomeDescription") or "").strip(),
+        "outcomeTheme": str(item.get("outcomeTheme") or "").strip(),
+        "outcomeSkill": str(item.get("outcomeSkill") or "").strip(),
     }
 
 
@@ -92,6 +99,12 @@ def _normalize_student(
 ) -> dict[str, Any]:
     if not isinstance(item, dict):
         raise ValueError(f"{fallback_row}. öğrenci verisi geçersiz.")
+    student_no = str(item.get("studentNo") or "").strip()
+    full_name = str(item.get("fullName") or "").strip()
+    if not student_no or not full_name or "okunamadı" in {student_no.casefold(), full_name.casefold()}:
+        raise ValueError(
+            f"{fallback_row}. öğrenci satırındaki okunamayan veya boş kimlik alanlarını düzeltiniz."
+        )
     scores = item.get("scores")
     if not isinstance(scores, list) or len(scores) != len(questions):
         raise ValueError(f"{fallback_row}. öğrenci için soru puanları eksik.")
@@ -115,19 +128,12 @@ def _normalize_student(
         )
     return {
         "rowNumber": item.get("rowNumber") or fallback_row,
-        "studentNo": str(item.get("studentNo") or "").strip(),
-        "fullName": str(item.get("fullName") or "").strip(),
+        "studentNo": student_no,
+        "fullName": full_name,
         "scores": normalized_scores,
         "calculatedTotal": calculated_total,
-        "attendance": str(item.get("attendance") or "Girdi").strip(),
+        "attendance": "",
     }
-
-
-def _is_participating(item: Any) -> bool:
-    if not isinstance(item, dict):
-        return True
-    attendance = str(item.get("attendance") or "Girdi").strip().casefold()
-    return attendance not in {"g", "girmedi", "katılmadı", "katilmadi", "yok"}
 
 
 def _number(value: Any, default: float | int | None = None) -> float:
@@ -153,9 +159,9 @@ def _category(rate: float) -> str:
 
 def _decision(rate: float) -> str:
     if rate >= 0.85:
-        return "Öğrenme çıktısındaki başarı korunmalı ve zenginleştirici çalışmalarla sürdürülmelidir."
+        return "Öğrenme çıktısında güçlü yeterlilik düzeyi tespit edilmiştir."
     if rate >= 0.70:
-        return "Kısa pekiştirme çalışmalarıyla öğrenmenin kalıcılığı desteklenmelidir."
+        return "Öğrenme çıktısında yeterlilik sağlanmış, gelişimin izlenmesine ihtiyaç bulunduğu değerlendirilmiştir."
     if rate >= 0.50:
-        return "Hedefe yönelik ek etkinlik ve biçimlendirici değerlendirme uygulanmalıdır."
-    return "Öğrenme eksikleri yeniden öğretim ve yakın izleme yoluyla öncelikli olarak desteklenmelidir."
+        return "Öğrenme çıktısında gelişim ihtiyacı bulunduğu tespit edilmiştir."
+    return "Öğrenme çıktısında öncelikli gelişim ihtiyacı bulunduğu tespit edilmiştir."

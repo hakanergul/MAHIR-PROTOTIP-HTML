@@ -2360,7 +2360,6 @@ const screenManager = (() => {
 
 
 const fileUploadBridge = (() => {
-  const progressTexts = ["✓ Dosya alındı", "✓ Belge okunuyor", "✓ CED oluşturuluyor", "✓ Program eşleştiriliyor", "✓ Ölçme analizi yapılıyor", "✓ Pedagojik analiz yapılıyor", "✓ Rapor hazırlanıyor", "✓ Tamamlandı"];
   const maxFileSize = 20 * 1024 * 1024;
   const allowedExtensions = ["pdf", "doc", "docx", "jpg", "jpeg", "png", "webp"];
 
@@ -2376,6 +2375,11 @@ const fileUploadBridge = (() => {
     const removeButton = document.querySelector("[data-remove-file]");
     const readButton = document.querySelector("[data-read-document]");
     const statusMessage = document.querySelector("[data-upload-status]");
+    const studentCountInput = document.querySelector("[data-student-count]");
+    const questionCountInput = document.querySelector("[data-question-count]");
+    const questionConfiguration = document.querySelector("[data-question-configuration]");
+    const scoreTotal = document.querySelector("[data-score-total]");
+    const structureStatus = document.querySelector("[data-exam-structure-status]");
 
     if (!fileInput || !readButton || typeof FormData === "undefined" || typeof fetch === "undefined") {
       return;
@@ -2385,7 +2389,92 @@ const fileUploadBridge = (() => {
     let structuredData = null;
     let previewUrl = null;
     let progressTimer;
+    let learningOutcomes = [];
     const reportRuntime = window.MAHIRReportRuntime = window.MAHIRReportRuntime || {};
+
+    const currentQuestionConfiguration = () => Array.from(questionConfiguration?.querySelectorAll("[data-question-config-row]") || []).map((row, index) => {
+      const outcomeSelect = row.querySelector("[data-question-outcome]");
+      const selected = learningOutcomes.find((outcome) => outcome.id === outcomeSelect?.value);
+      return {
+        number: index + 1,
+        maxScore: Number(row.querySelector("[data-question-score]")?.value || 0),
+        outcomeCode: selected?.code || "",
+        outcomeDescription: selected?.title || "",
+        outcomeTheme: selected?.theme || "",
+        outcomeSkill: selected?.skill || "",
+        outcomeKey: selected?.id || outcomeSelect?.value || ""
+      };
+    });
+
+    const updateStructureStatus = () => {
+      const questions = currentQuestionConfiguration();
+      const total = questions.reduce((sum, question) => sum + question.maxScore, 0);
+      if (scoreTotal) scoreTotal.textContent = `Toplam puan: ${total.toLocaleString("tr-TR")}`;
+      const incomplete = questions.some((question) => question.maxScore <= 0 || !question.outcomeCode);
+      if (structureStatus) {
+        structureStatus.textContent = incomplete
+          ? "Her soru için sıfırdan büyük bir azami puan ve öğrenme çıktısı seçiniz."
+          : `${questions.length} soru, ${total.toLocaleString("tr-TR")} toplam puan ve öğrenme çıktısı eşleştirmeleri hazır.`;
+        structureStatus.classList.toggle("is-success", !incomplete);
+        structureStatus.classList.toggle("is-error", incomplete);
+      }
+      return !incomplete;
+    };
+
+    const renderQuestionConfiguration = () => {
+      if (!questionConfiguration || !questionCountInput) return;
+      const count = Math.min(20, Math.max(1, Number(questionCountInput.value) || 1));
+      const previous = currentQuestionConfiguration();
+      questionCountInput.value = String(count);
+      questionConfiguration.replaceChildren();
+      for (let index = 0; index < count; index += 1) {
+        const saved = previous[index] || {};
+        const row = document.createElement("div");
+        row.className = "question-configuration-row";
+        row.dataset.questionConfigRow = "";
+        const badge = document.createElement("span");
+        badge.className = "question-number-badge";
+        badge.textContent = `Soru ${index + 1}`;
+        const scoreLabel = document.createElement("label");
+        scoreLabel.textContent = "Azami Puan";
+        const scoreInput = document.createElement("input");
+        scoreInput.type = "number";
+        scoreInput.min = "0.01";
+        scoreInput.step = "0.01";
+        scoreInput.required = true;
+        scoreInput.value = saved.maxScore || "";
+        scoreInput.dataset.questionScore = "";
+        scoreLabel.append(scoreInput);
+        const outcomeField = document.createElement("label");
+        outcomeField.textContent = "Öğrenme Çıktısı";
+        const outcomeSelect = document.createElement("select");
+        outcomeSelect.required = true;
+        outcomeSelect.dataset.questionOutcome = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = learningOutcomes.length ? "Öğrenme çıktısı seçiniz" : "Resmî öğrenme çıktısı verisi bekleniyor";
+        outcomeSelect.append(placeholder);
+        learningOutcomes.forEach((outcome) => {
+          const option = document.createElement("option");
+          option.value = outcome.id;
+          option.textContent = [outcome.theme, outcome.code, outcome.title].filter(Boolean).join(" — ");
+          option.selected = saved.outcomeKey === outcome.id;
+          outcomeSelect.append(option);
+        });
+        outcomeField.append(outcomeSelect);
+        row.append(badge, scoreLabel, outcomeField);
+        questionConfiguration.append(row);
+      }
+      updateStructureStatus();
+    };
+
+    const loadLearningOutcomes = () => fetch("shared/pilot/tde9/learning-outcomes-template.json")
+      .then((response) => response.ok ? response.json() : { learning_outcomes: [] })
+      .then((payload) => {
+        learningOutcomes = Array.isArray(payload.learning_outcomes) ? payload.learning_outcomes : [];
+        renderQuestionConfiguration();
+      })
+      .catch(renderQuestionConfiguration);
 
     const setStatus = (message, state = "") => {
       if (!statusMessage) return;
@@ -2479,21 +2568,10 @@ const fileUploadBridge = (() => {
       setStatus("Dosya hazır. “Verileri Oku ve Kontrol Et” düğmesiyle öğretmen onay ekranına geçebilirsiniz.", "success");
     };
 
-    const showProgressStep = (activeIndex) => {
-      const list = document.querySelector("#analysis-screen .analysis-progress ol");
-      if (!list) return;
-      while (list.children.length < progressTexts.length) list.append(document.createElement("li"));
-      Array.from(list.children).forEach((item, index) => {
-        item.textContent = index <= activeIndex ? progressTexts[index] : progressTexts[index].replace("✓ ", "");
-      });
-    };
-
     const showReport = (text) => {
-      const reportScreen = document.querySelector("#report-screen");
-      const reportTarget = document.querySelector("#report-screen .summary-card p");
-      if (!reportTarget || reportScreen?.dataset.reportLocked === "true") return;
+      const reportTarget = document.querySelector("[data-report-intro]");
+      if (!reportTarget) return;
       reportTarget.textContent = text;
-      reportTarget.style.whiteSpace = "pre-line";
     };
 
     const editableCell = (value, label, type = "text", field = "") => {
@@ -2520,28 +2598,39 @@ const fileUploadBridge = (() => {
       const studentBody = document.querySelector("[data-validation-students]");
       const examSummary = document.querySelector("[data-validation-exam-summary]");
       const warningList = document.querySelector("[data-validation-warnings]");
-      const questions = data.questions || [];
+      const questions = currentQuestionConfiguration();
+      const expectedStudentCount = Math.max(1, Number(studentCountInput?.value) || 1);
+      const parsedStudents = data.students || [];
+      const students = Array.from({ length: expectedStudentCount }, (_, index) => parsedStudents[index] || {
+        rowNumber: index + 1,
+        studentNo: "Okunamadı",
+        fullName: "Okunamadı",
+        scores: Array(questions.length).fill(null),
+        totalScore: null
+      });
+      structuredData = {
+        ...data,
+        questions,
+        students,
+        summary: { ...(data.summary || {}), questionCount: questions.length, studentCount: expectedStudentCount }
+      };
+      reportRuntime.structuredData = structuredData;
 
       questionBody?.replaceChildren();
       questions.forEach((question) => {
         const row = document.createElement("tr");
-        row.dataset.questionRow = "";
-        row.append(
-          editableCell(question.number, `${question.number}. soru numarası`, "number", "number"),
-          editableCell(question.maxScore, `${question.number}. soru azami puanı`, "number", "maxScore"),
-          editableCell(
-            question.outcomeCode,
-            `${question.number}. soru öğrenme çıktısı kodu`,
-            "text",
-            "outcomeCode"
-          )
-        );
+        [question.number, question.maxScore, `${question.outcomeCode}${question.outcomeDescription ? ` — ${question.outcomeDescription}` : ""}`].forEach((value) => {
+          const cell = document.createElement("td");
+          cell.className = "readonly-summary";
+          cell.textContent = value;
+          row.append(cell);
+        });
         questionBody?.append(row);
       });
 
       if (studentHead) {
         const row = document.createElement("tr");
-        ["Öğrenci No", "Ad Soyad", ...questions.map((question) => `S${question.number}`), "Toplam", "Katılım"]
+        ["Öğrenci No", "Ad Soyad", ...questions.map((question) => `S${question.number}`), "Toplam"]
           .forEach((label) => {
             const header = document.createElement("th");
             header.scope = "col";
@@ -2552,10 +2641,10 @@ const fileUploadBridge = (() => {
       }
 
       studentBody?.replaceChildren();
-      (data.students || []).forEach((student) => {
+      students.forEach((student, studentIndex) => {
         const row = document.createElement("tr");
         row.dataset.studentRow = "";
-        row.dataset.rowNumber = student.rowNumber;
+        row.dataset.rowNumber = student.rowNumber || studentIndex + 1;
         row.append(
           editableCell(student.studentNo, `${student.fullName || student.rowNumber} okul numarası`, "text", "studentNo"),
           editableCell(student.fullName, `${student.rowNumber}. öğrenci adı soyadı`, "text", "fullName")
@@ -2563,22 +2652,25 @@ const fileUploadBridge = (() => {
         questions.forEach((question, index) => {
           row.append(editableCell(student.scores?.[index], `${student.fullName || student.rowNumber} S${question.number} puanı`, "number", "score"));
         });
-        row.append(
-          editableCell(student.totalScore, `${student.fullName || student.rowNumber} toplam puanı`, "number", "totalScore"),
-          editableCell(student.attendance, `${student.fullName || student.rowNumber} katılım durumu`, "text", "attendance")
-        );
+        row.append(editableCell(student.totalScore, `${student.fullName || student.rowNumber} toplam puanı`, "number", "totalScore"));
         studentBody?.append(row);
       });
 
       if (examSummary) {
         const exam = data.exam || {};
         const identity = [exam.schoolName, exam.course, exam.classSection].filter(Boolean).join(" · ");
-        examSummary.textContent = `${identity || "Sınav bilgileri eksik"} — ${data.summary?.questionCount || 0} soru, ${data.summary?.studentCount || 0} öğrenci satırı okundu.`;
+        examSummary.textContent = `${identity || "Sınav bilgileri eksik"} — ${questions.length} soru, öğretmenin belirttiği ${expectedStudentCount} öğrenci için kontrol satırı oluşturuldu.`;
       }
 
       if (warningList) {
         warningList.replaceChildren();
-        const warnings = data.warnings?.length ? data.warnings : ["Belge yapısında otomatik kontrol uyarısı bulunmadı."];
+        const relevantWarnings = (data.warnings || []).filter((warning) => !/soru|öğrenme çıktısı|azami puan/i.test(warning));
+        const configuredTotal = questions.reduce((sum, question) => sum + Number(question.maxScore || 0), 0);
+        const documentTotal = Number(data.exam?.totalMaxScore);
+        if (Number.isFinite(documentTotal) && documentTotal > 0 && Math.abs(documentTotal - configuredTotal) > 0.01) {
+          relevantWarnings.push(`Belgedeki toplam puan (${documentTotal}) ile tanımlanan soru puanları toplamı (${configuredTotal}) eşleşmiyor.`);
+        }
+        const warnings = relevantWarnings.length ? relevantWarnings : ["MAHİR, yüklenen verilerde kontrol edilmesi gereken bir sorun tespit etmedi."];
         warnings.forEach((warning) => {
           const item = document.createElement("li");
           item.textContent = warning;
@@ -2593,19 +2685,13 @@ const fileUploadBridge = (() => {
     };
 
     const collectApprovedData = () => {
-      const questions = Array.from(document.querySelectorAll("[data-question-row]")).map((row, index) => ({
-        number: numberValue(row.querySelector('[data-validation-field="number"]')),
-        maxScore: numberValue(row.querySelector('[data-validation-field="maxScore"]')),
-        outcomeCode: row.querySelector('[data-validation-field="outcomeCode"]')?.value.trim() || "",
-        outcomeDescription: structuredData?.questions?.[index]?.outcomeDescription || ""
-      }));
+      const questions = structuredData?.questions || [];
       const students = Array.from(document.querySelectorAll("[data-student-row]")).map((row) => ({
         rowNumber: Number(row.dataset.rowNumber),
         studentNo: row.querySelector('[data-validation-field="studentNo"]')?.value.trim() || "",
         fullName: row.querySelector('[data-validation-field="fullName"]')?.value.trim() || "",
         scores: Array.from(row.querySelectorAll('[data-validation-field="score"]')).map(numberValue),
-        totalScore: numberValue(row.querySelector('[data-validation-field="totalScore"]')),
-        attendance: row.querySelector('[data-validation-field="attendance"]')?.value.trim() || "Girdi"
+        totalScore: numberValue(row.querySelector('[data-validation-field="totalScore"]'))
       }));
       return { exam: structuredData?.exam || {}, questions, students };
     };
@@ -2614,25 +2700,7 @@ const fileUploadBridge = (() => {
       const reportScreen = document.querySelector("#report-screen");
       if (reportScreen?.dataset.reportLocked === "true") return;
       reportRuntime.analysis = analysis;
-      const summary = analysis.summary || {};
-      const reportSummary = document.querySelector("#report-screen .summary-card p");
-      const general = document.querySelector("#report-screen [aria-labelledby='general-evaluation-title'] p");
-      const analysisTable = document.querySelector("#report-screen [aria-labelledby='analysis-table-title'] p");
-      const outcomes = document.querySelector("#report-screen [aria-labelledby='learning-outcomes-title'] p");
-      const strong = document.querySelector("#report-screen [aria-labelledby='strong-areas-title'] p");
-      const development = document.querySelector("#report-screen [aria-labelledby='development-areas-title'] p");
-      const suggestions = document.querySelector("#report-screen [aria-labelledby='teaching-suggestions-title'] p");
-      const percent = (rate) => `%${((rate || 0) * 100).toFixed(2)}`;
-      const strongOutcomes = (analysis.outcomes || []).filter((item) => item.successRate >= 0.70);
-      const developmentOutcomes = (analysis.outcomes || []).filter((item) => item.successRate < 0.70);
-
-      if (reportSummary) reportSummary.textContent = `${summary.participatingStudentCount} öğrencinin ${summary.questionCount} soruya ait öğretmen onaylı puanları analiz edilmiştir.`;
-      if (general) general.textContent = `Sınıf ortalaması ${summary.classAverage}; genel başarı oranı ${percent(summary.classSuccessRate)} olarak hesaplanmıştır. Sınava katılmayan öğrenci sayısı ${summary.absentStudentCount}.`;
-      if (analysisTable) analysisTable.textContent = (analysis.questions || []).map((item) => `Soru ${item.number}: ${percent(item.successRate)}`).join(" · ");
-      if (outcomes) outcomes.textContent = (analysis.outcomes || []).map((item) => `${item.outcomeCode}: ${percent(item.successRate)} (${item.category})`).join(" · ");
-      if (strong) strong.textContent = strongOutcomes.length ? strongOutcomes.map((item) => `${item.outcomeCode} — ${percent(item.successRate)}`).join(" · ") : "Güçlü alan eşiğine ulaşan öğrenme çıktısı bulunmamaktadır.";
-      if (development) development.textContent = developmentOutcomes.length ? developmentOutcomes.map((item) => `${item.outcomeCode} — ${percent(item.successRate)}`).join(" · ") : "Öncelikli gelişim alanı belirlenmemiştir.";
-      if (suggestions) suggestions.textContent = (analysis.outcomes || []).map((item) => `${item.outcomeCode}: ${item.decision}`).join(" ");
+      window.MAHIRReportExport?.syncOutputHeader(reportScreen);
     };
 
     const analyzeApprovedData = () => {
@@ -2651,10 +2719,9 @@ const fileUploadBridge = (() => {
         .then(({ response, payload }) => {
           if (!response.ok) throw new Error(payload.message || "Onaylanan veriler analiz edilemedi.");
           renderAnalysis(payload.analysis || {});
-          showProgressStep(progressTexts.length - 1);
           screenManager.approveData();
           screenManager.showScreen("analysis-screen");
-          showMessage(payload.message, "success");
+          showMessage("Analiz tamamlandı. Sınav sonuçları analiz raporu görüntülenmeye hazırdır.", "success");
         })
         .catch((error) => {
           const approvalMessage = document.querySelector("[data-approval-message]");
@@ -2672,18 +2739,16 @@ const fileUploadBridge = (() => {
 
     const uploadSelectedFile = () => {
       if (!selectedFile) return;
+      if (!updateStructureStatus()) {
+        setStatus("Sınav yapısındaki eksik alanları tamamlayınız.", "error");
+        return;
+      }
       const formData = new FormData();
-      let progressIndex = 0;
       formData.append("exam-file", selectedFile);
       document.dispatchEvent(new CustomEvent("mahir:report-reset"));
       readButton.disabled = true;
       readButton.setAttribute("aria-disabled", "true");
       readButton.textContent = "Belge Okunuyor…";
-      window.clearInterval(progressTimer);
-      showProgressStep(progressIndex);
-      progressTimer = window.setInterval(() => {
-        if (progressIndex < progressTexts.length - 2) showProgressStep(++progressIndex);
-      }, 500);
 
       fetch("/mahir-upload", {
         method: "POST",
@@ -2695,8 +2760,12 @@ const fileUploadBridge = (() => {
           const message = payload.message || (response.ok ? "Dosya başarıyla işlendi." : "Dosya işlenemedi.");
           window.clearInterval(progressTimer);
           if (response.ok) {
-            renderValidationData(payload.structuredData);
-            showProgressStep(progressTexts.length - 1);
+            renderValidationData(payload.structuredData || {
+              exam: {},
+              students: [],
+              warnings: ["MAHİR belge alanlarını otomatik olarak okuyamadı. Öğrenci bilgilerini ve puanları Veri Onay ekranında tamamlayınız."],
+              summary: {}
+            });
             const reportText = payload.reportText || payload.report || payload.report_text;
             const reportRequest = reportText ? Promise.resolve(reportText) : fetch(`/shared/report-example.txt?ts=${Date.now()}`).then((reportResponse) => reportResponse.ok ? reportResponse.text() : message);
             reportRequest.then(showReport).catch(() => showReport(message));
@@ -2727,6 +2796,10 @@ const fileUploadBridge = (() => {
 
     removeButton?.addEventListener("click", clearFile);
     readButton.addEventListener("click", uploadSelectedFile);
+    questionCountInput?.addEventListener("input", renderQuestionConfiguration);
+    questionConfiguration?.addEventListener("input", updateStructureStatus);
+    questionConfiguration?.addEventListener("change", updateStructureStatus);
+    loadLearningOutcomes();
     document.addEventListener("mahir:confirm-data", analyzeApprovedData);
 
     ["dragenter", "dragover"].forEach((eventName) => {

@@ -158,6 +158,7 @@
       return {
         number: question.number ?? structuredQuestion.number ?? index + 1,
         outcomeCode: normalizeText(question.outcomeCode || structuredQuestion.outcomeCode),
+        outcomeTheme: normalizeText(question.outcomeTheme || structuredQuestion.outcomeTheme),
         outcomeDescription: getQuestionDescription({ ...structuredQuestion, ...question }),
         maxScore,
         average,
@@ -170,8 +171,9 @@
     });
   };
 
-  const relatedQuestionsForOutcome = (outcomeCode) => getQuestionRows()
-    .filter((question) => normalizeText(question.outcomeCode) === normalizeText(outcomeCode))
+  const relatedQuestionsForOutcome = (outcomeCode, outcomeTheme = "") => getQuestionRows()
+    .filter((question) => normalizeText(question.outcomeCode) === normalizeText(outcomeCode)
+      && (!outcomeTheme || normalizeText(question.outcomeTheme) === normalizeText(outcomeTheme)))
     .map((question) => `S${question.number}`)
     .join(", ");
 
@@ -321,8 +323,8 @@
   const buildOutcomeBlock = () => {
     const outcomes = getAnalysis().outcomes || [];
     const rows = outcomes.map((outcome) => [
-      normalizeText(outcome.outcomeCode || outcome.learningOutcome),
-      relatedQuestionsForOutcome(outcome.outcomeCode),
+      [normalizeText(outcome.outcomeTheme), normalizeText(outcome.outcomeCode || outcome.learningOutcome), normalizeText(outcome.outcomeSkill)].filter(Boolean).join(" — "),
+      relatedQuestionsForOutcome(outcome.outcomeCode, outcome.outcomeTheme),
       formatPercent(outcome.successRate),
       successLevel(outcome.successRate, outcome.category),
       normalizeText(outcome.decision)
@@ -344,24 +346,24 @@
       tables: [[
         [`Güçlü öğrenme alanları: ${strong.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`],
         [`Geliştirilmesi gereken öğrenme alanları: ${development.map((item) => `${item.outcomeCode} (${formatPercent(item.successRate)})`).join("; ")}`],
-        ["Soru türü, bilişsel düzey ve hata örüntülerine ilişkin değerlendirme: Öğretmen tarafından onaylanan sınav verileri esas alınmıştır."]
+        ["Değerlendirme, öğretmen tarafından onaylanan soru puanları ile resmî öğrenme çıktısı ve beceri eşleştirmeleri esas alınarak yapılmıştır."]
       ]]
     };
   };
 
-  const buildSuggestionsBlock = () => {
+  const buildDevelopmentNeedsBlock = () => {
     const outcomes = getAnalysis().outcomes || [];
-    const targets = outcomes.filter((item) => Number(item.successRate) < 0.70).slice(0, 3);
+    const targets = outcomes.filter((item) => Number(item.successRate) < 0.70);
     const rows = targets.map((item, index) => [
       String(index + 1),
       `${item.outcomeCode || "Öğrenme Çıktısı"} (${formatPercent(item.successRate)})`,
       normalizeText(item.decision),
-      "Öğretmen gözlemi ve soru bazlı izleme"
+      Number(item.successRate) < 0.50 ? "Öncelikli" : "Gelişim ihtiyacı"
     ]);
     return {
-      heading: "F. İYİLEŞTİRME ÖNERİLERİ",
-      paragraphs: [],
-      tables: [[["Öncelik", "Tespit Edilen İhtiyaç", "Önerilen Öğretim Müdahalesi", "İzleme Kanıtı / Süre"], ...rows]]
+      heading: "F. GELİŞİM İHTİYAÇLARI VE DEĞERLENDİRME SONUÇLARI",
+      paragraphs: ["Bu bölüm uygulanacak etkinlik, kaynak, yöntem veya telafi programını belirlemez; yalnızca öğretmen onaylı sınav verilerinden hareketle gelişim ihtiyacını gösterir."],
+      tables: [[["Sıra", "Tespit Edilen İhtiyaç", "Değerlendirme Sonucu", "Öncelik Düzeyi"], ...rows]]
     };
   };
 
@@ -398,7 +400,7 @@
     buildQuestionBlock(),
     buildOutcomeBlock(),
     buildPedagogyBlock(),
-    buildSuggestionsBlock(),
+    buildDevelopmentNeedsBlock(),
     buildSourceBlock(),
     buildDocumentInfoBlock()
   ];
@@ -453,6 +455,27 @@
     });
   };
 
+  const renderPreviewBody = (reportElement, model) => {
+    const body = reportElement.querySelector("[data-report-preview-sections]");
+    if (!body) return;
+    body.replaceChildren();
+    model.blocks.forEach((block) => {
+      const section = document.createElement("article");
+      section.className = "report-section";
+      const heading = document.createElement("h3");
+      heading.textContent = block.heading;
+      section.append(heading);
+      block.paragraphs.forEach((paragraph) => {
+        if (!isUseful(paragraph)) return;
+        const p = document.createElement("p");
+        p.textContent = paragraph;
+        section.append(p);
+      });
+      block.tables.forEach((tableRows) => section.append(renderTable(tableRows)));
+      body.append(section);
+    });
+  };
+
   const syncOutputHeader = (reportElement) => {
     if (!reportElement) return null;
     const model = getReportModel(reportElement);
@@ -472,6 +495,7 @@
       });
     }
     renderOutputBody(reportElement, model);
+    renderPreviewBody(reportElement, model);
     return model;
   };
 
